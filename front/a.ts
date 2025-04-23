@@ -1,0 +1,3 @@
+interface moi{
+    a:number;
+}
