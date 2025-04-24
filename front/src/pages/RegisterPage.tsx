@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
+import React, { useState, useRef } from 'react';
+import { FiEye, FiEyeOff, FiUser, FiUpload } from 'react-icons/fi';
 import SecurityIllustration from '../components/SecurityIllustration';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -9,6 +9,8 @@ interface RegisterFormData {
   password: string;
   confirmPassword: string;
   acceptTerms: boolean;
+  avatar: File | null;
+  location: string; // Ajout du champ location requis par l'interface User
 }
 
 interface RegisterPageProps {
@@ -17,32 +19,127 @@ interface RegisterPageProps {
 
 const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<RegisterFormData>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
     acceptTerms: false,
+    avatar: null,
+    location: '',
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<keyof RegisterFormData, string>>>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target as HTMLInputElement;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
+
+    // Effacer l'erreur pour ce champ lorsqu'il est modifié
+    if (errors[name as keyof RegisterFormData]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData(prev => ({ ...prev, avatar: file }));
+    
+    // Créer une URL d'aperçu pour l'image
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreviewUrl(null);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Partial<Record<keyof RegisterFormData, string>> = {};
+    
+    // Validation du nom
+    if (!formData.name.trim()) {
+      newErrors.name = "Le nom est requis";
+    }
+    
+    // Validation de l'email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email.trim() || !emailRegex.test(formData.email)) {
+      newErrors.email = "Une adresse email valide est requise";
+    }
+    
+    // Validation du mot de passe
+    if (formData.password.length < 8) {
+      newErrors.password = "Le mot de passe doit contenir au moins 8 caractères";
+    }
+    
+    // Validation de la confirmation du mot de passe
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
+    }
+    
+    // Validation des CGU
+    if (!formData.acceptTerms) {
+      newErrors.acceptTerms = "Vous devez accepter les conditions d'utilisation";
+    }
+    
+    // Validation de la localisation
+    if (!formData.location.trim()) {
+      newErrors.location = "La localisation est requise";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log('Registration submitted:', formData);
-    // Si l'inscription est réussie, appeler onRegisterSuccess
-    if (formData.password === formData.confirmPassword && formData.acceptTerms) {
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    try {
+      // Dans une application réelle, vous enverriez les données à votre API ici
+      // y compris l'image qui devrait être envoyée en tant que FormData
+      console.log('Registration submitted:', formData);
+      
+      // Créer un objet FormData pour envoyer les fichiers
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('location', formData.location);
+      if (formData.avatar) {
+        formDataToSend.append('avatar', formData.avatar);
+      }
+      
+      // Simuler une requête API
+      // Dans une application réelle : await api.post('/register', formDataToSend);
+      
+      // Si l'inscription est réussie, appeler onRegisterSuccess
       onRegisterSuccess();
+      
       // Rediriger vers le tableau de bord après la connexion
       navigate('/dashboard/projects');
+    } catch (error) {
+      console.error('Registration failed:', error);
+      // Gérer les erreurs d'inscription ici
     }
   };
 
@@ -85,14 +182,47 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
         <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 lg:p-8 lg:pl-12">
           <div className="w-full max-w-md space-y-6 sm:space-y-8">
             <div className="text-center lg:text-left">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Create an Account</h2>
-              <p className="mt-2 text-xs sm:text-sm text-gray-600">Join our community by creating your account.</p>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Créer un compte</h2>
+              <p className="mt-2 text-xs sm:text-sm text-gray-600">Rejoignez notre communauté en créant votre compte.</p>
             </div>
 
             <form className="mt-6 sm:mt-8 space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
+              {/* Photo de profil */}
+              <div className="flex flex-col items-center space-y-3">
+                <div 
+                  className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-90 transition-opacity border-2 border-gray-300"
+                  onClick={triggerFileInput}
+                >
+                  {previewUrl ? (
+                    <img 
+                      src={previewUrl} 
+                      alt="Avatar preview" 
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <FiUser className="h-12 w-12 text-gray-400" />
+                  )}
+                </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+                <button
+                  type="button"
+                  onClick={triggerFileInput}
+                  className="flex items-center text-sm text-blue-600 hover:text-blue-500"
+                >
+                  <FiUpload className="mr-1" />
+                  {previewUrl ? "Changer la photo" : "Ajouter une photo de profil"}
+                </button>
+              </div>
+
               <div className="space-y-3 sm:space-y-4">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">Full Name</label>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nom complet</label>
                   <input
                     id="name"
                     name="name"
@@ -101,8 +231,9 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className={`mt-1 block w-full px-3 py-2 border ${errors.name ? 'border-red-300 ring-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                   />
+                  {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
                 </div>
 
                 <div>
@@ -115,12 +246,28 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className={`mt-1 block w-full px-3 py-2 border ${errors.email ? 'border-red-300 ring-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                   />
+                  {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                  <label htmlFor="location" className="block text-sm font-medium text-gray-700">Localisation</label>
+                  <input
+                    id="location"
+                    name="location"
+                    type="text"
+                    placeholder="Ex: Paris, France"
+                    required
+                    value={formData.location}
+                    onChange={handleChange}
+                    className={`mt-1 block w-full px-3 py-2 border ${errors.location ? 'border-red-300 ring-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+                  />
+                  {errors.location && <p className="mt-1 text-xs text-red-500">{errors.location}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">Mot de passe</label>
                   <div className="mt-1 relative">
                     <input
                       id="password"
@@ -130,7 +277,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
                       required
                       value={formData.password}
                       onChange={handleChange}
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className={`block w-full px-3 py-2 border ${errors.password ? 'border-red-300 ring-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                     />
                     <button
                       type="button"
@@ -144,10 +291,11 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
                       )}
                     </button>
                   </div>
+                  {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirmer le mot de passe</label>
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -156,8 +304,9 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className={`mt-1 block w-full px-3 py-2 border ${errors.confirmPassword ? 'border-red-300 ring-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
                   />
+                  {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
                 </div>
 
                 <div className="flex items-start sm:items-center">
@@ -167,42 +316,40 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
                     type="checkbox"
                     checked={formData.acceptTerms}
                     onChange={handleChange}
-                    className="mt-1 sm:mt-0 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className={`mt-1 sm:mt-0 h-4 w-4 ${errors.acceptTerms ? 'border-red-300 text-red-600' : 'border-gray-300 text-blue-600'} focus:ring-blue-500 rounded`}
                   />
                   <label htmlFor="acceptTerms" className="ml-2 block text-xs sm:text-sm text-gray-700">
-                    I agree to the{' '}
+                    J'accepte les{' '}
                     <button 
                       type="button" 
                       className="text-blue-600 hover:text-blue-500"
                       onClick={() => console.log('Terms and conditions clicked')}
                     >
-                      Terms and Conditions
+                      conditions d'utilisation
                     </button>
                   </label>
                 </div>
+                {errors.acceptTerms && <p className="text-xs text-red-500">{errors.acceptTerms}</p>}
               </div>
 
               <div>
                 <button
                   type="submit"
-                  disabled={!formData.acceptTerms}
-                  className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                    formData.acceptTerms ? 'bg-black hover:bg-gray-800' : 'bg-gray-400 cursor-not-allowed'
-                  } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black`}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
                 >
-                  Sign up
+                  S'inscrire
                 </button>
               </div>
             </form>
 
             <div className="text-center">
               <p className="text-xs sm:text-sm text-gray-600">
-                Already have an account?{' '}
+                Vous avez déjà un compte ?{' '}
                 <Link 
                   to="/login"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
-                  Log in
+                  Se connecter
                 </Link>
               </p>
             </div>

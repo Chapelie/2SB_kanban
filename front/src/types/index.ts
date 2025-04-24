@@ -22,6 +22,24 @@ export interface User {
   initials?: string;
 }
 
+export interface SubTask {
+  id: string;
+  title: string;
+  description?: string;
+  status: 'Completed' | 'InProgress' | 'Open';
+  priority: 'low' | 'medium' | 'high';
+  timeSpent: string;
+  assignedTo: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+  createdAt: string;
+  dueDate?: string;
+  comments?: number;
+  attachments?: number;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -35,11 +53,14 @@ export interface Task {
     name: string;
     avatar: string;
   };
-  // Nouveaux champs pour le Kanban
   description?: string;
   days?: number;
   comments?: number;
   attachments?: number;
+  projectId: string;
   assignees?: User[];
   kanbanStatus?: 'backlog' | 'in-progress' | 'completed';
+  priority?: 'low' | 'medium' | 'high';
+  openedDaysAgo?: number;
+  subtasks?: SubTask[];
 }
