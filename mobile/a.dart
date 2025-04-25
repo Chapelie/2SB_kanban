@@ -1,4 +1,0 @@
-class ra{
-    
-}
-void main(){}
