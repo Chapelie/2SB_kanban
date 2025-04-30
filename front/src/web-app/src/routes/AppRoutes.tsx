@@ -10,8 +10,10 @@ import ProjectDetailPage from '../pages/ProjectDetailPage';
 import TasksPage from '../pages/TasksPage';
 import WorkLogsPage from '../pages/WorkLogsPage';
 import PerformancePage from '../pages/PerformancePage';
-import SettingsPage from '../pages/SettingsPage';
-import AdminPage from '../pages/AdminPage';
+import SettingsLayout from '../pages/settings/SettingsLayout';
+import AccountPage from '../pages/settings/AccountPage';
+import NotificationsPage from '../pages/settings/NotificationsPage';
+import ProfilePage from '../pages/settings/ProfilePage';
 
 import { User } from '../types';
 
@@ -90,8 +92,11 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
         <Route path="tasks" element={<TasksPage />} />
         <Route path="work-logs" element={<WorkLogsPage />} />
         <Route path="performance" element={<PerformancePage />} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="admin" element={<AdminPage />} />
+        <Route path="settings" element={<SettingsLayout />}>
+          <Route path="account" element={<AccountPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+        </Route>
         <Route index element={<Navigate to="/dashboard/projects" replace />} />
       </Route>
 

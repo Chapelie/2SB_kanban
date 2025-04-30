@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface PaginationProps {
   currentPage: number;
@@ -7,6 +8,8 @@ interface PaginationProps {
 }
 
 const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+  const { theme } = useTheme();
+  
   return (
     <div className="flex justify-center mt-6">
       <div className="flex items-center space-x-1">
@@ -15,8 +18,8 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
           disabled={currentPage === 1}
           className={`px-3 py-1 rounded-md ${
             currentPage === 1
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'text-gray-600 hover:bg-gray-100'
+              ? 'text-[var(--text-secondary)] cursor-not-allowed'
+              : 'text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]'
           }`}
         >
           Previous
@@ -28,8 +31,8 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
             onClick={() => onPageChange(page)}
             className={`px-3 py-1 rounded-md ${
               currentPage === page
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-600 hover:bg-gray-100'
+                ? 'bg-[var(--accent-color)] text-white'
+                : 'text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]'
             }`}
           >
             {page}
@@ -41,8 +44,8 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
           disabled={currentPage === totalPages}
           className={`px-3 py-1 rounded-md ${
             currentPage === totalPages
-              ? 'text-gray-400 cursor-not-allowed'
-              : 'text-gray-600 hover:bg-gray-100'
+              ? 'text-[var(--text-secondary)] cursor-not-allowed'
+              : 'text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]'
           }`}
         >
           Next

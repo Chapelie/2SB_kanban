@@ -1,6 +1,6 @@
 import React from 'react';
 import { Task } from '../types';
-import { FaClock, FaComment, FaClipboardList, FaEllipsisH } from 'react-icons/fa';
+import { FaComment, FaClipboardList,  } from 'react-icons/fa';
 
 // Définir l'interface des props avec onClick
 interface TaskItemProps {
@@ -9,6 +9,7 @@ interface TaskItemProps {
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({ task, onClick }) => {
+  
   // Fonction pour déterminer la couleur du badge de priorité
   const getPriorityBadgeColor = (priority?: string) => {
     switch (priority) {
@@ -39,14 +40,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onClick }) => {
     }
   };
 
-  // Fonction pour déterminer la couleur de l'icône de temps
-  const getTimeIconColor = (timeSpent: string) => {
-    if (timeSpent === '00:15:00') {
-      return 'text-red-500';
-    }
-    return 'text-green-500';
-  };
-  
+
   // Fonction pour obtenir le texte du statut en français
   const getStatusText = (status: string) => {
     switch (status) {
@@ -79,12 +73,12 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onClick }) => {
 
   return (
     <div 
-      className="border-b border-gray-200 last:border-b-0 py-4 flex items-center hover:bg-gray-50 transition-colors cursor-pointer"
+      className="border-b border-[var(--border-color)] last:border-b-0 py-4 flex items-center hover:bg-[var(--bg-secondary)] transition-colors cursor-pointer"
       onClick={onClick} // Utiliser la prop onClick passée
     >
       <div className="flex-shrink-0 mr-4">
-        <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
-          <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="w-6 h-6 bg-[var(--bg-secondary)] rounded-full flex items-center justify-center">
+          <svg className="h-4 w-4 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         </div>
@@ -92,9 +86,9 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onClick }) => {
       
       <div className="flex-1">
         <div className="flex items-center mb-1">
-          <h2 className="font-medium text-gray-800">{task.title}</h2>
+          <h2 className="font-medium text-[var(--text-primary)]">{task.title}</h2>
         </div>
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-[var(--text-secondary)]">
           {task.taskNumber} · Ouvert il y a {task.openedDaysAgo} jours par {task.openedBy}
         </div>
       </div>
@@ -110,41 +104,36 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onClick }) => {
           </span>
         )}
         
-        <div className={`flex items-center ${getTimeIconColor(task.timeSpent)}`}>
-          <FaClock className="h-4 w-4 mr-1" />
-          <span className="text-sm">{task.timeSpent}</span>
-        </div>
-        
         <div>
           <img 
-            className="h-8 w-8 rounded-full" 
+            className="h-8 w-8 rounded-full border border-[var(--border-color)]" 
             src={task.assignedTo.avatar || "https://randomuser.me/api/portraits/men/1.jpg"} 
             alt={task.assignedTo.name} 
           />
         </div>
         
         {task.subtasks && task.subtasks.length > 0 && (
-          <div className="flex items-center text-gray-700">
+          <div className="flex items-center text-[var(--text-primary)]">
             <span className="mr-1">{task.subtasks.length}</span>
-            <FaClipboardList className="h-4 w-4 text-gray-500" />
+            <FaClipboardList className="h-4 w-4 text-[var(--text-secondary)]" />
           </div>
         )}
         
         {task.comments && task.comments > 0 && (
-          <div className="flex items-center text-gray-700">
+          <div className="flex items-center text-[var(--text-primary)]">
             <span className="mr-1">{task.comments}</span>
-            <FaComment className="h-4 w-4 text-gray-500" />
+            <FaComment className="h-4 w-4 text-[var(--text-secondary)]" />
           </div>
         )}
         
         <button 
-          className="text-gray-400 hover:text-gray-600"
+          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
           onClick={(e) => {
             e.stopPropagation(); // Empêche le déclenchement du onClick du parent
             console.log('Options cliquées pour la tâche', task.id);
           }}
         >
-          <FaEllipsisH className="h-5 w-5" />
+          
         </button>
       </div>
     </div>

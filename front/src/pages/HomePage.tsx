@@ -221,16 +221,23 @@ const HomePage: React.FC = () => {
 
                     {/* Hero Image */}
                     <motion.div className="lg:w-1/2" variants={itemVariants}>
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-blue-600 rounded-lg transform translate-x-3 translate-y-3 opacity-20"></div>
+                        <div className="relative bg-gradient-to-br from-blue-50 to-white p-8 rounded-2xl shadow-xl">
                             <img
-                              src={ "public/images/hero-mockup.jpeg"}
-                              alt="AProjectO Dashboard"
-                              className="rounded-lg shadow-xl relative z-10"
-                              onError={(e) => {
-                                e.currentTarget.src = 'https://via.placeholder.com/600x400?text=AProjectO+Dashboard';
-                              }}
+                                src={"public/images/hero-mockup.jpeg"}
+                                alt="AProjectO Dashboard"
+                                className="rounded-lg relative z-10 w-full max-w-lg mx-auto"
+                                style={{
+                                    objectFit: 'contain',
+                                    maxHeight: '400px'
+                                }}
+                                onError={(e) => {
+                                    e.currentTarget.src = 'https://via.placeholder.com/600x400?text=AProjectO+Dashboard';
+                                }}
                             />
+
+                            {/* Éléments décoratifs */}
+                            <div className="absolute top-0 left-0 w-full h-full bg-blue-100 opacity-5 rounded-2xl"></div>
+                            <div className="absolute -bottom-2 -right-2 w-full h-full border-2 border-blue-200 rounded-2xl z-0"></div>
                         </div>
                     </motion.div>
                 </div>
@@ -390,8 +397,8 @@ const HomePage: React.FC = () => {
                         <div className="flex justify-center space-x-4 mb-8 flex-wrap gap-y-2">
                             <button
                                 className={`px-5 py-2 rounded-full transition-all ${activeDemo === 1
-                                        ? 'bg-blue-600 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-blue-600 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                                 onClick={() => handleDemoChange(1)}
                             >
@@ -399,8 +406,8 @@ const HomePage: React.FC = () => {
                             </button>
                             <button
                                 className={`px-5 py-2 rounded-full transition-all ${activeDemo === 2
-                                        ? 'bg-blue-600 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-blue-600 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                                 onClick={() => handleDemoChange(2)}
                             >
@@ -408,8 +415,8 @@ const HomePage: React.FC = () => {
                             </button>
                             <button
                                 className={`px-5 py-2 rounded-full transition-all ${activeDemo === 3
-                                        ? 'bg-blue-600 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-blue-600 text-white shadow-md'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                                 onClick={() => handleDemoChange(3)}
                             >
@@ -442,7 +449,7 @@ const HomePage: React.FC = () => {
 
                                         {activeDemo === 1 && (
                                             <img
-                                                src={ "public/images/demo-kanban.png"}
+                                                src={"public/images/demo-kanban.png"}
                                                 alt="Tableau Kanban"
                                                 className="w-full"
                                                 onError={(e) => {
@@ -452,7 +459,7 @@ const HomePage: React.FC = () => {
                                         )}
                                         {activeDemo === 2 && (
                                             <img
-                                                src={ "public/images/demo-tasks.png"}
+                                                src={"public/images/demo-tasks.png"}
                                                 alt="Liste des tâches"
                                                 className="w-full"
                                                 onError={(e) => {
@@ -462,7 +469,7 @@ const HomePage: React.FC = () => {
                                         )}
                                         {activeDemo === 3 && (
                                             <img
-                                                src={ "public/images/demo-dashboard.png"}
+                                                src={"public/images/demo-dashboard.png"}
                                                 alt="Tableau de bord"
                                                 className="w-full"
                                                 onError={(e) => {

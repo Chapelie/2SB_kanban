@@ -11,12 +11,15 @@ export interface Project {
 export interface TeamMember {
   id: string;
   name: string;
+  location: string;
   avatar: string;
+  initials?: string;
 }
 
 export interface User {
   id: string;
   name: string;
+  email: string;
   location: string;
   avatar: string;
   initials?: string;
@@ -63,4 +66,13 @@ export interface Task {
   priority?: 'low' | 'medium' | 'high';
   openedDaysAgo?: number;
   subtasks?: SubTask[];
+}
+
+export interface WorkLog {
+  id: string;
+  projectId: string;
+  userId: string;
+  description: string;
+  date: string;
+  status: 'pending' | 'completed';
 }

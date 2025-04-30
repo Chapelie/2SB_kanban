@@ -2,6 +2,7 @@ import React from 'react';
 import { FaCalendarAlt, FaExternalLinkAlt, FaUsers, FaExclamationCircle, FaArrowRight } from 'react-icons/fa';
 import { Project } from '../types';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface ProjectCardProps {
   project: Project;
@@ -10,6 +11,7 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const handleCardClick = () => {
     if (onClick) {
@@ -66,11 +68,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
 
   return (
     <div 
-      className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 mb-4 group hover:shadow-lg transition-all duration-300 transform hover:translate-y-[-3px] cursor-pointer"
+      className="bg-[var(--card-bg)] rounded-lg overflow-hidden shadow-sm border border-[var(--border-color)] mb-4 group hover:shadow-lg transition-all duration-300 transform hover:translate-y-[-3px] cursor-pointer"
       onClick={handleCardClick}
     >
       {/* Barre de progression en haut */}
-      <div className="h-1.5 w-full bg-gray-100">
+      <div className="h-1.5 w-full bg-[var(--bg-secondary)]">
         <div 
           className={`h-full ${
             project.status === 'Offtrack' ? 'bg-red-500' : 
@@ -84,11 +86,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
         <div className="flex justify-between items-start mb-4">
           <div>
             <div className="flex items-center">
-              <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-lg font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors">
                 {project.title}
               </h3>
               <button
-                className="ml-2 text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" 
+                className="ml-2 text-[var(--text-secondary)] hover:text-[var(--accent-color)] opacity-0 group-hover:opacity-100 transition-opacity" 
                 onClick={handleExternalLinkClick}
                 aria-label="Ouvrir dans un nouvel onglet"
               >
@@ -114,18 +116,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
           </div>
         </div>
         
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[40px]">
+        <p className="text-[var(--text-secondary)] text-sm mb-4 line-clamp-2 min-h-[40px]">
           {project.description}
         </p>
 
-        <div className="flex flex-wrap justify-between items-center pt-3 border-t border-gray-100">
+        <div className="flex flex-wrap justify-between items-center pt-3 border-t border-[var(--border-color)]">
           {/* Métrique d'équipe */}
           <div className="flex items-center mr-4 mb-2 sm:mb-0">
             <div className="flex -space-x-2 mr-2">
               {project.teamMembers.slice(0, 3).map((member) => (
                 <div 
                   key={member.id} 
-                  className="w-8 h-8 rounded-full border-2 border-white ring-2 ring-transparent group-hover:ring-blue-100 transition-all duration-300 overflow-hidden"
+                  className="w-8 h-8 rounded-full border-2 border-[var(--bg-primary)] ring-2 ring-transparent group-hover:ring-[var(--accent-color)] transition-all duration-300 overflow-hidden"
                   title={member.name}
                 >
                   <img 
@@ -136,12 +138,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
                 </div>
               ))}
               {project.teamMembers.length > 3 && (
-                <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-xs font-medium text-gray-600 ring-2 ring-transparent group-hover:ring-blue-100 transition-all">
+                <div className="w-8 h-8 rounded-full bg-[var(--bg-secondary)] border-2 border-[var(--bg-primary)] flex items-center justify-center text-xs font-medium text-[var(--text-secondary)] ring-2 ring-transparent group-hover:ring-[var(--accent-color)] transition-all">
                   +{project.teamMembers.length - 3}
                 </div>
               )}
             </div>
-            <div className="flex items-center text-gray-500 text-sm">
+            <div className="flex items-center text-[var(--text-secondary)] text-sm">
               <FaUsers className="mr-1" size={12} />
               <span>{project.teamMembers.length}</span>
             </div>
@@ -150,13 +152,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
           {/* Issues et bouton d'action */}
           <div className="flex items-center">
             {project.issuesCount > 0 && (
-              <div className="flex items-center mr-3 text-gray-600 text-sm bg-gray-50 px-2.5 py-1.5 rounded-lg">
+              <div className="flex items-center mr-3 text-[var(--text-secondary)] text-sm bg-[var(--bg-secondary)] px-2.5 py-1.5 rounded-lg">
                 <FaExclamationCircle className={`mr-1 ${project.issuesCount > 5 ? 'text-red-500' : 'text-yellow-500'}`} size={12} />
                 <span>{project.issuesCount} issues</span>
               </div>
             )}
             <button 
-              className="text-blue-500 hover:text-blue-600 p-1.5 rounded-full hover:bg-blue-50 transition-colors"
+              className="text-[var(--accent-color)] hover:text-[var(--accent-hover)] p-1.5 rounded-full hover:bg-[var(--bg-secondary)] transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/dashboard/projects/${project.id}`);

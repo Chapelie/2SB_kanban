@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from './routes/AppRoutes';
-import { User } from './types';
+import { ThemeProvider } from './contexts/ThemeContext';
+import './styles/themes.css'; // Importez les styles de thème
+
+// Simuler un utilisateur connecté
+const currentUser = {
+  id: '1',
+  name: 'Rafik SAWADOGO',
+  location: 'Bobo, Burkina Faso',
+  avatar: '/api/placeholder/128/128',
+  role: 'Administrateur'
+};
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  // User mock data
-  const currentUser: User = {
-    id: '1',
-    name: 'Anima Agrawal',
-    location: 'UP, India',
-    avatar: '/api/placeholder/40/40'
-  };
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
 
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
@@ -23,14 +25,16 @@ const App: React.FC = () => {
   };
 
   return (
-    <BrowserRouter>
-      <AppRoutes 
-        isAuthenticated={isAuthenticated}
-        currentUser={currentUser}
-        handleLoginSuccess={handleLoginSuccess}
-        handleRegisterSuccess={handleRegisterSuccess}
-      />
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AppRoutes 
+          isAuthenticated={isAuthenticated}
+          currentUser={currentUser}
+          handleLoginSuccess={handleLoginSuccess}
+          handleRegisterSuccess={handleRegisterSuccess}
+        />
+      </BrowserRouter>
+    </ThemeProvider>
   );
 };
 

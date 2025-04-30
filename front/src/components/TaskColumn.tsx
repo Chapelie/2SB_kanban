@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Task } from '../types';
 import TaskCard from './TaskCard';
 import { FaPlus, FaEllipsisH } from 'react-icons/fa';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface TaskColumnProps {
   title: string;
@@ -11,8 +12,8 @@ interface TaskColumnProps {
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, status: 'backlog' | 'in-progress' | 'completed') => void;
   onTaskClick: (task: Task) => void;
-  onAddTask: () => void; // Ajout de la prop manquante
-  isDragging?: boolean; // Rendre optionnel pour rétrocompatibilité
+  onAddTask: () => void;
+  isDragging?: boolean;
 }
 
 const TaskColumn: React.FC<TaskColumnProps> = ({ 
@@ -26,6 +27,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
   onAddTask,
   isDragging = false
 }) => {
+  const { theme } = useTheme();
   const [isDragOver, setIsDragOver] = useState(false);
 
   // Gérer l'entrée du drag
@@ -56,7 +58,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
 
   return (
     <div 
-      className={`bg-gray-50 rounded-lg p-4 h-full transition-colors ${isDragOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''}`}
+      className={`bg-[var(--bg-secondary)] rounded-lg p-4 h-full transition-colors ${isDragOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : ''}`}
       onDragOver={(e) => {
         e.preventDefault();
         onDragOver(e);
@@ -69,22 +71,22 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
       }}
     >
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-medium text-gray-700 flex items-center">
+        <h3 className="font-medium text-[var(--text-primary)] flex items-center">
           {getTranslatedTitle(title)}
-          <span className="ml-2 text-xs font-normal text-gray-500 bg-gray-200 rounded-full px-2 py-0.5">
+          <span className="ml-2 text-xs font-normal text-[var(--text-secondary)] bg-[var(--bg-primary)] rounded-full px-2 py-0.5">
             {tasks.length}
           </span>
         </h3>
-        <button className="text-gray-400 hover:text-gray-600" aria-label="Plus d'options">
+        <button className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]" aria-label="Plus d'options">
           <FaEllipsisH className="h-5 w-5" />
         </button>
       </div>
       
       <div 
-        className="border-2 border-dashed border-blue-300 rounded-lg h-10 mb-4 flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
-        onClick={onAddTask} // Utiliser la fonction passée en prop
+        className="border-2 border-dashed border-[var(--accent-color)] rounded-lg h-10 mb-4 flex items-center justify-center cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors"
+        onClick={onAddTask}
       >
-        <FaPlus className="h-5 w-5 text-blue-500" />
+        <FaPlus className="h-5 w-5 text-[var(--accent-color)]" />
       </div>
       
       <div className="space-y-3 min-h-[100px]">
@@ -98,7 +100,7 @@ const TaskColumn: React.FC<TaskColumnProps> = ({
             />
           ))
         ) : (
-          <div className="flex items-center justify-center h-20 border-2 border-dashed border-gray-200 rounded-lg text-gray-400 text-sm">
+          <div className="flex items-center justify-center h-20 border-2 border-dashed border-[var(--border-color)] rounded-lg text-[var(--text-secondary)] text-sm">
             Déposez une tâche ici
           </div>
         )}

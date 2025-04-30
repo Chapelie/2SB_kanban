@@ -1,0 +1,95 @@
+
+/* Thème clair (par défaut) */
+.theme-light {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --border-color: #e5e7eb;
+    --accent-color: #2563eb;
+    --accent-hover: #1d4ed8;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --sidebar-bg: #fff;
+    --card-bg: #fff;
+  }
+  
+  /* Thème sombre */
+  .theme-dark {
+    --bg-primary: #1f2937;
+    --bg-secondary: #111827;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --border-color: #374151;
+    --accent-color: #3b82f6;
+    --accent-hover: #60a5fa;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --sidebar-bg: #111827;
+    --card-bg: #1f2937;
+  }
+  
+  /* Thème bleu */
+  .theme-blue {
+    --bg-primary: #f0f9ff;
+    --bg-secondary: #e0f2fe;
+    --text-primary: #0c4a6e;
+    --text-secondary: #0369a1;
+    --border-color: #bae6fd;
+    --accent-color: #0284c7;
+    --accent-hover: #0369a1;
+    --shadow-color: rgba(3, 105, 161, 0.1);
+    --sidebar-bg: #f0f9ff;
+    --card-bg: #ffffff;
+  }
+  
+  /* Tailles de police */
+  .text-small {
+    font-size: 0.875rem;
+  }
+  
+  .text-medium {
+    font-size: 1rem;
+  }
+  
+  .text-large {
+    font-size: 1.125rem;
+  }
+  
+  /* Désactivation des animations */
+  .no-animations * {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  /* Styles communs basés sur les variables CSS */
+  body {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+  
+  .app-sidebar {
+    background-color: var(--sidebar-bg);
+    border-color: var(--border-color);
+  }
+  
+  .app-card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  
+  .app-button-primary {
+    background-color: var(--accent-color);
+    color: white;
+  }
+  
+  .app-button-primary:hover {
+    background-color: var(--accent-hover);
+  }
+  
+  .app-link {
+    color: var(--accent-color);
+  }
+  
+  .app-link:hover {
+    color: var(--accent-hover);
+  }

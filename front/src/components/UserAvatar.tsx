@@ -1,5 +1,4 @@
 import React from 'react';
-
 interface UserAvatarProps {
   user: {
     name: string;
@@ -11,6 +10,7 @@ interface UserAvatarProps {
 }
 
 const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'md', className = '' }) => {
+  
   const sizeClasses = {
     sm: 'w-6 h-6 text-xs',
     md: 'w-8 h-8 text-sm',
@@ -23,7 +23,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'md', className = 
       <img 
         src={user.avatar} 
         alt={user.name} 
-        className={`${sizeClasses[size]} rounded-full border border-white object-cover ${className}`}
+        className={`${sizeClasses[size]} rounded-full border border-[var(--bg-primary)] object-cover ${className}`}
       />
     );
   }
@@ -38,7 +38,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ user, size = 'md', className = 
   const initials = user.initials || user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   
   return (
-    <div className={`${sizeClasses[size]} ${bgColor} rounded-full border border-white flex items-center justify-center text-white ${className}`}>
+    <div className={`${sizeClasses[size]} ${bgColor} rounded-full border border-[var(--bg-primary)] flex items-center justify-center text-white ${className}`}>
       {initials}
     </div>
   );

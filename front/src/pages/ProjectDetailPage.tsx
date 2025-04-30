@@ -7,6 +7,7 @@ import ToggleSwitch from '../components/ToggleSwitch';
 import TaskModal from '../components/TaskModal';
 import { FaArrowLeft, FaPlus } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import CreateTaskModal from '../components/CreateTaskModal';
 
 // Fonction pour convertir le statut d'une tâche vers le format kanban
 const mapTaskStatusToKanban = (status: string): 'backlog' | 'in-progress' | 'completed' => {
@@ -28,9 +29,9 @@ const mapTaskStatusToKanban = (status: string): 'backlog' | 'in-progress' | 'com
 const getProjectData = (): { project: Project, tasks: Task[] } => {
   // Exemple d'utilisateurs
   const teamMembers = [
-    { id: '1', name: 'John Doe', avatar: '/api/placeholder/40/40', initials: 'JD' },
-    { id: '2', name: 'Jane Smith', avatar: '/api/placeholder/40/40', initials: 'JS' },
-    { id: '3', name: 'Alex Johnson', avatar: '/api/placeholder/40/40', initials: 'AJ' },
+    { id: '1', name: 'John Doe', avatar: '/api/placeholder/40/40', initials: 'JD', location: 'Remote' },
+    { id: '2', name: 'Jane Smith', avatar: '/api/placeholder/40/40', initials: 'JS', location: 'Remote' },
+    { id: '3', name: 'Alex Johnson', avatar: '/api/placeholder/40/40', initials: 'AJ', location: 'Remote' },
   ];
 
   // Création d'utilisateurs compatibles avec le type User (incluant location)
@@ -39,6 +40,7 @@ const getProjectData = (): { project: Project, tasks: Task[] } => {
     name: member.name,
     avatar: member.avatar,
     location: 'Remote', // Ajout de la propriété location obligatoire
+    email: `${member.name.toLowerCase().replace(' ', '.')}@example.com`,
     initials: member.name.split(' ').map(n => n[0]).join('').toUpperCase()
   }));
   
@@ -175,6 +177,7 @@ const getProjectData = (): { project: Project, tasks: Task[] } => {
 };
 
 const ProjectDetailPage: React.FC = () => {
+  // Utiliser un underscore pour éviter l'avertissement
   const { projectId } = useParams<{ projectId?: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -184,6 +187,17 @@ const ProjectDetailPage: React.FC = () => {
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [showNewTaskModal, setShowNewTaskModal] = useState<boolean>(false);
   const [newTaskColumnStatus, setNewTaskColumnStatus] = useState<'backlog' | 'in-progress' | 'completed' | null>(null);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  
+  // Utilisateur actuel simulé
+  const [currentUser, setCurrentUser] = useState<User>({
+    id: '1',
+    name: 'John Doe',
+    avatar: '/api/placeholder/40/40',
+    location: 'Remote',
+    email: 'john.doe@example.com',
+    initials: 'JD'
+  });
 
   // Charger les données du projet
   useEffect(() => {
@@ -191,6 +205,9 @@ const ProjectDetailPage: React.FC = () => {
     const { project, tasks } = getProjectData();
     setProject(project);
     setTasks(tasks);
+    
+    // Initialiser la liste des projets avec le projet actuel
+    setAllProjects([project]);
   }, [projectId]);
 
   // Effet pour gérer les classes CSS globales pendant le drag
@@ -228,10 +245,10 @@ const ProjectDetailPage: React.FC = () => {
     const draggedTask = tasks.find(t => t.id === taskId);
     if (draggedTask) {
       const ghostImage = document.createElement('div');
-      ghostImage.classList.add('bg-white', 'p-3', 'rounded', 'shadow-lg', 'text-sm', 'max-w-xs');
+      ghostImage.classList.add('bg-[var(--bg-primary)]', 'p-3', 'rounded', 'shadow-lg', 'text-sm', 'max-w-xs');
       ghostImage.innerHTML = `
-        <div class="font-medium text-gray-800">${draggedTask.title}</div>
-        <div class="text-xs text-gray-500">${draggedTask.taskNumber}</div>
+        <div class="font-medium text-[var(--text-primary)]">${draggedTask.title}</div>
+        <div class="text-xs text-[var(--text-secondary)]">${draggedTask.taskNumber}</div>
       `;
       document.body.appendChild(ghostImage);
       ghostImage.style.position = 'absolute';
@@ -325,26 +342,33 @@ const ProjectDetailPage: React.FC = () => {
   
   // Gestionnaire pour sauvegarder une nouvelle tâche
   const handleSaveNewTask = (newTaskData: Partial<Task>) => {
-    if (newTaskColumnStatus) {
+    if (newTaskColumnStatus && project) {
       const newTask: Task = {
         id: `task-${Date.now()}`,
         title: newTaskData.title || 'Nouvelle tâche',
         description: newTaskData.description || '',
         days: newTaskData.days || 0,
         comments: 0,
-        attachments: 0,
+        attachments: newTaskData.attachments || 0,
         assignees: newTaskData.assignees || [],
         kanbanStatus: newTaskColumnStatus,
         taskNumber: `TASK-${(tasks.length + 1).toString().padStart(3, '0')}`,
         openedDate: new Date().toISOString().split('T')[0],
-        openedBy: 'Utilisateur actuel',
-        status: newTaskColumnStatus === 'backlog' ? 'Open' : 
-                newTaskColumnStatus === 'in-progress' ? 'InProgress' : 'Completed',
+        openedBy: currentUser.name,
+        status: newTaskData.status || (
+          newTaskColumnStatus === 'backlog' ? 'Open' : 
+          newTaskColumnStatus === 'in-progress' ? 'InProgress' : 'Completed'
+        ),
         timeSpent: '0',
-        assignedTo: newTaskData.assignedTo || { id: '1', name: 'Utilisateur actuel', avatar: '' },
-        projectId: projectId || 'project-1',
+        assignedTo: newTaskData.assignedTo || {
+          id: currentUser.id,
+          name: currentUser.name,
+          avatar: currentUser.avatar
+        },
+        projectId: newTaskData.projectId || project.id,
         openedDaysAgo: 0,
-        priority: newTaskData.priority || 'medium'
+        priority: newTaskData.priority || 'medium',
+        subtasks: newTaskData.subtasks || []
       };
       
       setTasks(prevTasks => [...prevTasks, newTask]);
@@ -358,27 +382,27 @@ const ProjectDetailPage: React.FC = () => {
     return (
       <div className="flex-1 p-8 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full mb-4"></div>
-          <p className="text-gray-600">Chargement des détails du projet...</p>
+          <div className="inline-block animate-spin h-8 w-8 border-4 border-t-[var(--accent-color)] border-r-transparent border-b-[var(--accent-color)] border-l-transparent rounded-full mb-4"></div>
+          <p className="text-[var(--text-secondary)]">Chargement des détails du projet...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 bg-gray-50 overflow-y-auto">
+    <div className="flex-1 bg-[var(--bg-secondary)] overflow-y-auto">
       <div className="px-6 py-4">
         {/* Entête avec navigation */}
         <div className="mb-6">
-          <Link to="/dashboard/projects" className="inline-flex items-center text-blue-500 hover:text-blue-700 mb-4">
+          <Link to="/dashboard/projects" className="inline-flex items-center text-[var(--accent-color)] hover:text-[var(--accent-hover)] mb-4">
             <FaArrowLeft className="mr-2" />
             Retour aux Projets
           </Link>
           
           <div className="flex flex-wrap justify-between items-center">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-800">{project.title}</h1>
-              <p className="text-gray-600 mt-1">{project.description}</p>
+              <h1 className="text-2xl font-semibold text-[var(--text-primary)]">{project.title}</h1>
+              <p className="text-[var(--text-secondary)] mt-1">{project.description}</p>
             </div>
             
             <div className="mt-4 sm:mt-0 flex items-center space-x-4">
@@ -389,7 +413,7 @@ const ProjectDetailPage: React.FC = () => {
                 {project.status === 'OnTrack' ? 'En bonne voie' : 
                  project.status === 'Offtrack' ? 'En retard' : project.status}
               </div>
-              <div className="text-gray-600 text-sm">
+              <div className="text-[var(--text-secondary)] text-sm">
                 Échéance: <span className="font-medium">{project.dueDate}</span>
               </div>
             </div>
@@ -407,7 +431,7 @@ const ProjectDetailPage: React.FC = () => {
           
           <div className="flex items-center space-x-4">
             <button 
-              className="flex items-center bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+              className="flex items-center bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white px-4 py-2 rounded-md transition-colors"
               onClick={() => handleCreateNewTask('backlog')}
             >
               <FaPlus className="mr-2" />
@@ -475,40 +499,24 @@ const ProjectDetailPage: React.FC = () => {
         />
       )}
       
-      {/* Modal pour créer une nouvelle tâche - à implémenter selon vos besoins */}
-      {showNewTaskModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl">
-            <h2 className="text-xl font-semibold mb-4">Créer une nouvelle tâche</h2>
-            {/* Formulaire pour nouvelle tâche - implémentation simplifiée */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Titre</label>
-              <input 
-                type="text" 
-                className="w-full border-gray-300 rounded-md shadow-sm"
-                placeholder="Titre de la tâche"
-              />
-            </div>
-            
-            <div className="flex justify-end space-x-3">
-              <button 
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-                onClick={() => {
-                  setShowNewTaskModal(false);
-                  setNewTaskColumnStatus(null);
-                }}
-              >
-                Annuler
-              </button>
-              <button 
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                onClick={() => handleSaveNewTask({ title: 'Nouvelle tâche' })}
-              >
-                Créer
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Utilisation du composant CreateTaskModal au lieu du modal simple */}
+      {showNewTaskModal && project && (
+        <CreateTaskModal
+          isOpen={showNewTaskModal}
+          onClose={() => {
+            setShowNewTaskModal(false);
+            setNewTaskColumnStatus(null);
+          }}
+          onSubmit={(newTaskData) => {
+            handleSaveNewTask({
+              ...newTaskData,
+              kanbanStatus: newTaskColumnStatus || 'backlog'
+            });
+          }}
+          projects={allProjects}
+          currentUser={currentUser}
+          users={project.teamMembers}
+        />
       )}
     </div>
   );

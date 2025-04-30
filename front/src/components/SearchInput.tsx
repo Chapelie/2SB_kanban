@@ -14,12 +14,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
   placeholder = 'Search...', 
   className = '' 
 }) => {
+  
   return (
     <div className={`relative ${className}`}>
-      <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+      <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[var(--text-secondary)]" />
       <input
         type="text"
-        className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+        className="block w-full pl-10 pr-3 py-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] text-sm text-[var(--text-primary)]"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
