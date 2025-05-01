@@ -77,9 +77,9 @@ const HomePage: React.FC = () => {
                     {/* Logo */}
                     <div className="flex items-center space-x-2">
                         <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
-                            <span className="text-white text-lg font-bold">A</span>
+                            <span className="text-white text-lg font-bold">2SB</span>
                         </div>
-                        <span className="font-bold text-xl text-gray-800">AProjectO</span>
+                        <span className="font-bold text-xl text-gray-800">2SB Kanban</span>
                     </div>
 
                     {/* Navigation - Desktop */}
@@ -190,7 +190,7 @@ const HomePage: React.FC = () => {
                             </span>
                         </h1>
                         <p className="mt-6 text-lg text-gray-600 max-w-lg">
-                            AProjectO vous permet de suivre vos projets, gérer vos tâches et collaborer avec votre équipe en toute simplicité.
+                            2SB Kanban vous permet de suivre vos projets, gérer vos tâches et collaborer avec votre équipe en toute simplicité.
                         </p>
                         <div className="mt-8 flex flex-col sm:flex-row gap-4">
                             <Link
@@ -224,14 +224,14 @@ const HomePage: React.FC = () => {
                         <div className="relative bg-gradient-to-br from-blue-50 to-white p-8 rounded-2xl shadow-xl">
                             <img
                                 src={"public/images/hero-mockup.jpeg"}
-                                alt="AProjectO Dashboard"
+                                alt="2SB Kanban Dashboard"
                                 className="rounded-lg relative z-10 w-full max-w-lg mx-auto"
                                 style={{
                                     objectFit: 'contain',
                                     maxHeight: '400px'
                                 }}
                                 onError={(e) => {
-                                    e.currentTarget.src = 'https://via.placeholder.com/600x400?text=AProjectO+Dashboard';
+                                    e.currentTarget.src = 'https://via.placeholder.com/600x400?text=2SB Kanban+Dashboard';
                                 }}
                             />
 
@@ -266,7 +266,7 @@ const HomePage: React.FC = () => {
                             <span className="absolute -bottom-2 left-0 right-0 h-1 bg-blue-400 rounded-full"></span>
                         </h2>
                         <p className="mt-6 text-lg text-gray-600 max-w-xl mx-auto">
-                            Découvrez comment AProjectO peut vous aider à rationaliser votre flux de travail et à améliorer la productivité de votre équipe.
+                            Découvrez comment 2SB Kanban peut vous aider à rationaliser votre flux de travail et à améliorer la productivité de votre équipe.
                         </p>
                     </div>
 
@@ -384,7 +384,7 @@ const HomePage: React.FC = () => {
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 relative inline-block">
-                            Voyez AProjectO en action
+                            Voyez 2SB Kanban en action
                             <span className="absolute -bottom-2 left-0 right-0 h-1 bg-blue-400 rounded-full"></span>
                         </h2>
                         <p className="mt-6 text-lg text-gray-600 max-w-xl mx-auto">
@@ -494,7 +494,7 @@ const HomePage: React.FC = () => {
                             <span className="absolute -bottom-2 left-0 right-0 h-1 bg-blue-400 rounded-full"></span>
                         </h2>
                         <p className="mt-6 text-lg text-gray-600 max-w-xl mx-auto">
-                            Découvrez pourquoi des milliers d'équipes font confiance à AProjectO
+                            Découvrez pourquoi des milliers d'équipes font confiance à 2SB Kanban
                         </p>
                     </div>
 
@@ -522,7 +522,7 @@ const HomePage: React.FC = () => {
                                 </div>
                             </div>
                             <p className="text-gray-700">
-                                "AProjectO a complètement transformé notre façon de gérer les projets. L'interface intuitive et les fonctionnalités puissantes nous ont permis d'améliorer notre productivité de 40%."
+                                "2SB Kanban a complètement transformé notre façon de gérer les projets. L'interface intuitive et les fonctionnalités puissantes nous ont permis d'améliorer notre productivité de 40%."
                             </p>
                             <div className="mt-4 flex text-yellow-400">
                                 {[1, 2, 3, 4, 5].map((star) => (
@@ -556,7 +556,7 @@ const HomePage: React.FC = () => {
                                 </div>
                             </div>
                             <p className="text-gray-700">
-                                "En tant que startup en pleine croissance, nous avions besoin d'un outil flexible qui puisse évoluer avec nous. AProjectO a dépassé toutes nos attentes et est devenu indispensable pour notre équipe."
+                                "En tant que startup en pleine croissance, nous avions besoin d'un outil flexible qui puisse évoluer avec nous. 2SB Kanban a dépassé toutes nos attentes et est devenu indispensable pour notre équipe."
                             </p>
                             <div className="mt-4 flex text-yellow-400">
                                 {[1, 2, 3, 4, 5].map((star) => (
@@ -590,7 +590,7 @@ const HomePage: React.FC = () => {
                                 </div>
                             </div>
                             <p className="text-gray-700">
-                                "La vue Kanban d'AProjectO est la meilleure que j'ai utilisée. Elle nous permet de voir exactement où en sont nos projets et ce qui doit être fait ensuite. C'est un changement radical pour notre équipe."
+                                "La vue Kanban d'2SB Kanban est la meilleure que j'ai utilisée. Elle nous permet de voir exactement où en sont nos projets et ce qui doit être fait ensuite. C'est un changement radical pour notre équipe."
                             </p>
                             <div className="mt-4 flex text-yellow-400">
                                 {[1, 2, 3, 4, 5].map((star) => (
@@ -769,7 +769,7 @@ const HomePage: React.FC = () => {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         viewport={{ once: true }}
                     >
-                        Rejoignez des milliers d'équipes qui utilisent AProjectO pour réussir leurs projets.
+                        Rejoignez des milliers d'équipes qui utilisent 2SB Kanban pour réussir leurs projets.
                     </motion.p>
                     <motion.div
                         className="flex flex-col sm:flex-row gap-4 justify-center"
@@ -838,11 +838,11 @@ const HomePage: React.FC = () => {
                     <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
                         <div className="flex items-center mb-4 md:mb-0">
                             <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center mr-2">
-                                <span className="text-white text-lg font-bold">A</span>
+                                <span className="text-white text-lg font-bold">2SB</span>
                             </div>
-                            <span className="font-bold text-xl text-white">AProjectO</span>
+                            <span className="font-bold text-xl text-white">2SB Kanban</span>
                         </div>
-                        <p className="text-sm">© {new Date().getFullYear()} AProjectO. Tous droits réservés.</p>
+                        <p className="text-sm">© {new Date().getFullYear()} 2SB Kanban. Tous droits réservés.</p>
                         <div className="flex space-x-4 mt-4 md:mt-0">
                             <a href="#" className="hover:text-white transition-colors">
                                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">

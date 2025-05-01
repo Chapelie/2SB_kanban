@@ -32,9 +32,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
       <div className="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
         <div className="flex items-center">
           <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-md">
-            <span className="text-white font-bold">A</span>
+            <span className="text-white font-bold">2SB</span>
           </div>
-          {!collapsed && <span className="ml-3 text-lg font-semibold text-[var(--text-primary)]">AProjectO</span>}
+          {!collapsed && <span className="ml-3 text-lg font-semibold text-[var(--text-primary)]">2SB Kanban</span>}
         </div>
         <button 
           onClick={toggleSidebar} 

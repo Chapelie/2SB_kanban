@@ -1048,8 +1048,8 @@ const SettingsPage: React.FC = () => {
 
             {/* Informations sur l'application */}
             <div className="mt-8 text-center text-[var(--text-secondary)] text-sm">
-              <p>AProjectO - Version 1.0.0</p>
-              <p className="mt-1">© 2025 AProjectO. Tous droits réservés.</p>
+              <p>2SB Kanban - Version 1.0.0</p>
+              <p className="mt-1">© 2025 2SB Kanban. Tous droits réservés.</p>
             </div>
           </>
         );

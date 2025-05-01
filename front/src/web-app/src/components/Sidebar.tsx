@@ -23,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
           <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-md">
             <span className="text-white font-bold">A</span>
           </div>
-          <span className="ml-3 text-lg font-semibold text-blue-900">AProjectO</span>
+          <span className="ml-3 text-lg font-semibold text-blue-900">2SB Kanban</span>
         </div>
       </div>
 

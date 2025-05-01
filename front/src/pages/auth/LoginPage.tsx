@@ -50,7 +50,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     <div className="h-8 w-8 rounded-full bg-[var(--accent-color)] flex items-center justify-center">
                         <span className="text-white text-sm font-bold">A</span>
                     </div>
-                    <span className="font-semibold text-[var(--text-primary)]">AProjectO</span>
+                    <span className="font-semibold text-[var(--text-primary)]">2SB Kanban</span>
                 </div>
                 
                 {/* System Name - Caché sur très petits écrans */}

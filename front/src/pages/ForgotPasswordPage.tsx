@@ -33,7 +33,7 @@ const ForgotPasswordPage: React.FC = () => {
           <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
             <span className="text-white text-sm font-bold">A</span>
           </div>
-          <span className="font-semibold text-gray-800">AProjectO</span>
+          <span className="font-semibold text-gray-800">2SB Kanban</span>
         </div>
         
         {/* System Name - Caché sur très petits écrans */}
