@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaBell, FaEnvelope, FaRegQuestionCircle, FaChevronDown, FaUser, FaCog, FaSignOutAlt, FaShieldAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
@@ -10,12 +10,23 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const toggleUserMenu = () => {
-    setShowUserMenu(!showUserMenu);
-  };
-  
+  // Gérer la fermeture du menu au clic en dehors
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Fonction pour obtenir le titre de la page à partir de l'ID
   const getPageTitle = (pageId: string): string => {
     switch (pageId) {
@@ -31,6 +42,10 @@ const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
         return 'Paramètres';
       case 'admin':
         return 'Admin Console';
+      case 'notifications':
+        return 'Notifications';
+      case 'messages':
+        return 'Messages';
       default:
         return 'Tableau de Bord';
     }
@@ -52,8 +67,6 @@ const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
   const handleNavigateToProfile = () => {
     navigate('/dashboard/settings');
     setShowUserMenu(false);
-    // Vous pouvez implémenter une logique pour activer directement l'onglet profil
-    // en passant un paramètre ou en utilisant le contexte/état global
   };
 
   const handleNavigateToSettings = () => {
@@ -65,6 +78,14 @@ const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
     navigate('/dashboard/admin');
     setShowUserMenu(false);
   };
+  
+  const handleNavigateToNotifications = () => {
+    navigate('/dashboard/notifications');
+  };
+  
+  const handleNavigateToMessages = () => {
+    navigate('/dashboard/messages');
+  };
 
   const handleLogout = () => {
     // Simuler une déconnexion
@@ -72,6 +93,10 @@ const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
     setShowUserMenu(false);
     // Dans une vraie application, vous implémenteriez un processus de déconnexion complet
     // navigate('/login');
+  };
+
+  const toggleUserMenu = () => {
+    setShowUserMenu(prev => !prev);
   };
   
   return (
@@ -95,9 +120,12 @@ const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
             <FaRegQuestionCircle className="text-xl" />
           </button>
           
-          {/* Emails */}
+          {/* Emails (Messages) */}
           <div className="relative">
-            <button className="text-[var(--text-secondary)] hover:text-[var(--accent-color)] focus:outline-none transition-colors duration-200">
+            <button 
+              onClick={handleNavigateToMessages}
+              className="text-[var(--text-secondary)] hover:text-[var(--accent-color)] focus:outline-none transition-colors duration-200"
+            >
               <FaEnvelope className="text-xl" />
             </button>
             <div className="absolute -top-1 -right-1 bg-[var(--accent-color)] rounded-full w-4 h-4 flex items-center justify-center">
@@ -107,7 +135,10 @@ const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
           
           {/* Notifications */}
           <div className="relative">
-            <button className="text-[var(--text-secondary)] hover:text-[var(--accent-color)] focus:outline-none transition-colors duration-200">
+            <button 
+              onClick={handleNavigateToNotifications}
+              className="text-[var(--text-secondary)] hover:text-[var(--accent-color)] focus:outline-none transition-colors duration-200"
+            >
               <FaBell className="text-xl" />
             </button>
             <div className="absolute -top-1 -right-1 bg-red-500 rounded-full w-4 h-4 flex items-center justify-center">
@@ -120,63 +151,68 @@ const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
         <div className="mx-4 h-8 w-px bg-[var(--border-color)] hidden sm:block"></div>
         
         {/* Profil utilisateur */}
-        <div className="relative">
-          <button 
+        <div className="relative" ref={menuRef}>
+          <div 
+            className="flex items-center space-x-3 focus:outline-none cursor-pointer"
             onClick={toggleUserMenu}
-            className="flex items-center space-x-3 focus:outline-none group"
           >
             <div className="mr-2 text-right hidden sm:block">
-              <div className="font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-color)] transition-colors duration-200">{user.name}</div>
-              <div className="text-xs text-[var(--text-secondary)]">{user.location}</div>
+              <div className="font-medium text-[var(--text-primary)] hover:text-[var(--accent-color)] transition-colors duration-200">{user.name}</div>
+              {/* Location a été supprimé ici */}
             </div>
             <div className="flex items-center space-x-1">
               <img
                 src={user.avatar || "/api/placeholder/40/40"}
                 alt={user.name}
-                className="w-9 h-9 rounded-full border-2 border-[var(--border-color)] group-hover:border-[var(--accent-color)] transition-colors duration-200 object-cover"
+                className="w-9 h-9 rounded-full border-2 border-[var(--border-color)] hover:border-[var(--accent-color)] transition-colors duration-200 object-cover"
               />
-              <FaChevronDown className="text-[var(--text-secondary)] text-xs group-hover:text-[var(--accent-color)] transition-colors duration-200" />
+              <FaChevronDown className={`text-[var(--text-secondary)] text-xs transition-colors duration-200 ${showUserMenu ? 'text-[var(--accent-color)] transform rotate-180' : ''}`} />
             </div>
-          </button>
+          </div>
           
           {/* Dropdown menu */}
-          {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-[var(--bg-primary)] rounded-lg shadow-lg py-1 z-10 border border-[var(--border-color)]">
-              <button 
-                onClick={handleNavigateToProfile}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
-              >
-                <FaUser className="mr-2 text-[var(--text-secondary)]" /> 
-                Mon Profil
-              </button>
-              
-              <button 
-                onClick={handleNavigateToSettings}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
-              >
-                <FaCog className="mr-2 text-[var(--text-secondary)]" /> 
-                Paramètres
-              </button>
-              
-              <button 
-                onClick={handleNavigateToAdmin}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
-              >
-                <FaShieldAlt className="mr-2 text-[var(--text-secondary)]" /> 
-                Admin Console
-              </button>
-              
-              <div className="border-t border-[var(--border-color)] my-1"></div>
-              
-              <button 
-                onClick={handleLogout}
-                className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-[var(--bg-secondary)]"
-              >
-                <FaSignOutAlt className="mr-2" /> 
-                Se déconnecter
-              </button>
-            </div>
-          )}
+          <div 
+            className={`absolute right-0 mt-2 w-48 bg-[var(--bg-primary)] rounded-lg shadow-lg py-1 z-10 border border-[var(--border-color)] 
+            transition-all duration-200 transform origin-top ${
+              showUserMenu 
+                ? 'opacity-100 visible scale-100' 
+                : 'opacity-0 invisible scale-95'
+            }`}
+          >
+            <button 
+              onClick={handleNavigateToProfile}
+              className="w-full text-left flex items-center px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+            >
+              <FaUser className="mr-2 text-[var(--text-secondary)]" /> 
+              Mon Profil
+            </button>
+            
+            <button 
+              onClick={handleNavigateToSettings}
+              className="w-full text-left flex items-center px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+            >
+              <FaCog className="mr-2 text-[var(--text-secondary)]" /> 
+              Paramètres
+            </button>
+            
+            <button 
+              onClick={handleNavigateToAdmin}
+              className="w-full text-left flex items-center px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+            >
+              <FaShieldAlt className="mr-2 text-[var(--text-secondary)]" /> 
+              Admin Console
+            </button>
+            
+            <div className="border-t border-[var(--border-color)] my-1"></div>
+            
+            <button 
+              onClick={handleLogout}
+              className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-[var(--bg-secondary)]"
+            >
+              <FaSignOutAlt className="mr-2" /> 
+              Se déconnecter
+            </button>
+          </div>
         </div>
       </div>
     </div>

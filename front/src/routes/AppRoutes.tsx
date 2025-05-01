@@ -12,6 +12,8 @@ import WorkLogsPage from '../pages/WorkLogsPage';
 import PerformancePage from '../pages/PerformancePage';
 import SettingsPage from '../pages/SettingsPage';
 import AdminPage from '../pages/AdminPage';
+import NotificationsPage from '../pages/NotificationsPage';
+import MessagesPage from '../pages/MessagesPage';
 
 import { User } from '../types';
 
@@ -92,6 +94,8 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
         <Route path="performance" element={<PerformancePage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="admin" element={<AdminPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="messages" element={<MessagesPage />} />
         <Route index element={<Navigate to="/dashboard/projects" replace />} />
       </Route>
 
