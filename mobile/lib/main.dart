@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'config/app_routes.dart';
 import 'config/themes.dart';
 import 'controllers/auth_controller.dart';
@@ -14,6 +15,10 @@ void main() async {
   // Initialiser le stockage local
   await StorageService.init();
 
+  // Vérifier si l'utilisateur a déjà vu l'onboarding
+  final prefs = await SharedPreferences.getInstance();
+  final hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
+
   runApp(
     MultiProvider(
       providers: [
@@ -21,15 +26,19 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProjectController()),
         ChangeNotifierProvider(create: (_) => TaskController()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-
       ],
-      child: const MyApp(),
+      child: MyApp(hasSeenOnboarding: hasSeenOnboarding),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final bool hasSeenOnboarding;
+
+  const MyApp({
+    Key? key,
+    required this.hasSeenOnboarding,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +47,9 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      initialRoute: AppRoutes.login,
+      initialRoute: hasSeenOnboarding ? AppRoutes.login : AppRoutes.onboarding,
       onGenerateRoute: AppRoutes.onGenerateRoute,
       debugShowCheckedModeBanner: false,
-      
     );
   }
 }

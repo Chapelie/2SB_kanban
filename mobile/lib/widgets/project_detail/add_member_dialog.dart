@@ -8,10 +8,10 @@ class AddMemberDialog extends StatefulWidget {
   final List<TeamMember> currentMembers;
 
   const AddMemberDialog({
-    Key? key,
+    super.key,
     required this.projectId,
     required this.currentMembers,
-  }) : super(key: key);
+  });
 
   @override
   State<AddMemberDialog> createState() => _AddMemberDialogState();
@@ -230,7 +230,7 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                 children: [
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.person_add_alt_1,
                         color: Colors.white,
                         size: 24,
