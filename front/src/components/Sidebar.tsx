@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { FaProjectDiagram, FaTasks, FaClipboardList, FaChartLine, FaCog, FaChevronLeft } from 'react-icons/fa';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface SidebarProps {
   activePage: string;
   onNavigate: (page: string) => void;
+  id?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, id }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const { theme } = useTheme();
 
   const menuItems = [
     { id: 'project', label: 'Projets', icon: <FaProjectDiagram size={20} /> },
@@ -27,7 +26,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, onNavigate }) => {
   };
 
   return (
-    <div className={`${collapsed ? 'w-16' : 'w-64'} bg-[var(--sidebar-bg)] h-full border-r border-[var(--border-color)] shadow-sm transition-all duration-300 flex flex-col`}>
+    <div 
+      id={id}
+      className={`${collapsed ? 'w-16' : 'w-64'} bg-[var(--sidebar-bg)] h-full border-r border-[var(--border-color)] shadow-sm transition-all duration-300 flex flex-col`}
+    >
       {/* Logo et bouton de réduction */}
       <div className="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
         <div className="flex items-center">

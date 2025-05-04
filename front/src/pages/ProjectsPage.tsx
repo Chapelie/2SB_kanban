@@ -5,8 +5,6 @@ import CreateProjectModal from '../components/CreateProjectModal';
 import Pagination from '../components/Pagination';
 import { FaPlus, FaSearch } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext';
-
 // Utilisateur connecté (simulé)
 const currentUser: User = {
   id: '1',
@@ -52,7 +50,6 @@ const getAllUsers = (): User[] => {
 };
 
 const ProjectsPage: React.FC = () => {
-  const { theme } = useTheme();
   const [currentPage, setCurrentPage] = useState(1);
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -143,6 +140,7 @@ const ProjectsPage: React.FC = () => {
         <div className="flex flex-wrap justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Projets</h1>
           <button 
+            id="create-project-button"
             className="bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white font-medium px-4 py-2 rounded-md flex items-center"
             onClick={handleCreateProject}
           >
@@ -187,7 +185,7 @@ const ProjectsPage: React.FC = () => {
         ) : (
           <>
             {/* Grille de projets avec une marge significative en bas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div id="projects-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {paginatedProjects.map((project) => (
                 <div 
                   key={project.id}

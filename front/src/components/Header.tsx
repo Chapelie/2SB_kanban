@@ -151,7 +151,7 @@ const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
         <div className="mx-4 h-8 w-px bg-[var(--border-color)] hidden sm:block"></div>
         
         {/* Profil utilisateur */}
-        <div className="relative" ref={menuRef}>
+        <div className="relative" ref={menuRef} id="user-profile-menu">
           <div 
             className="flex items-center space-x-3 focus:outline-none cursor-pointer"
             onClick={toggleUserMenu}

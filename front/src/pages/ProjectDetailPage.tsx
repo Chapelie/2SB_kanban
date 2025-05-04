@@ -5,7 +5,7 @@ import TaskColumn from '../components/TaskColumn';
 import SearchInput from '../components/SearchInput';
 import ToggleSwitch from '../components/ToggleSwitch';
 import TaskModal from '../components/TaskModal';
-import { FaArrowLeft, FaPlus } from 'react-icons/fa';
+import { FaArrowLeft, FaPlus, FaUserPlus, FaEnvelope } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import CreateTaskModal from '../components/CreateTaskModal';
 
@@ -27,152 +27,119 @@ const mapTaskStatusToKanban = (status: string): 'backlog' | 'in-progress' | 'com
 
 // Simuler l'obtention des données du projet et des tâches
 const getProjectData = (): { project: Project, tasks: Task[] } => {
-  // Exemple d'utilisateurs
-  const teamMembers = [
-    { id: '1', name: 'John Doe', avatar: '/api/placeholder/40/40', initials: 'JD', location: 'Remote' },
-    { id: '2', name: 'Jane Smith', avatar: '/api/placeholder/40/40', initials: 'JS', location: 'Remote' },
-    { id: '3', name: 'Alex Johnson', avatar: '/api/placeholder/40/40', initials: 'AJ', location: 'Remote' },
-  ];
-
-  // Création d'utilisateurs compatibles avec le type User (incluant location)
-  const users: User[] = teamMembers.map(member => ({
-    id: member.id,
-    name: member.name,
-    avatar: member.avatar,
-    location: 'Remote', // Ajout de la propriété location obligatoire
-    email: `${member.name.toLowerCase().replace(' ', '.')}@example.com`,
-    initials: member.name.split(' ').map(n => n[0]).join('').toUpperCase()
-  }));
-  
-  // Création du projet
+  // Création d'un projet de test
   const project: Project = {
-    id: 'project-1',
-    title: 'Refonte de la plateforme Adoddle',
-    description: 'Refonte du tableau de bord principal et amélioration de l\'expérience utilisateur pour notre plateforme SaaS.',
-    dueDate: '05 MAI 2025',
+    id: '1',
+    title: 'Développement d\'une application web Kanban',
+    description: 'Application de gestion de projets avec tableau Kanban et suivi des tâches',
+    dueDate: '15 décembre 2023',
     status: 'OnTrack',
-    issuesCount: 8,
-    teamMembers: teamMembers
+    issuesCount: 3,
+    teamMembers: [
+      {
+        id: '1',
+        name: 'John Doe',
+        location: 'Paris',
+        avatar: '/api/placeholder/40/40',
+        initials: 'JD'
+      },
+      {
+        id: '2',
+        name: 'Marie Dupont',
+        location: 'Lyon',
+        avatar: '/api/placeholder/40/40',
+        initials: 'MD'
+      },
+      {
+        id: '3',
+        name: 'Alex Martin',
+        location: 'Marseille',
+        avatar: '/api/placeholder/40/40',
+        initials: 'AM'
+      }
+    ]
   };
-  
-  // Création des tâches
+
+  // Création de tâches de test
   const tasks: Task[] = [
     {
-      id: 'task-1',
-      title: 'Étude des besoins utilisateurs',
-      description: 'Interroger les utilisateurs et recueillir des retours sur leur expérience avec la plateforme actuelle.',
-      days: 5,
-      comments: 3,
-      attachments: 2,
-      assignees: users.slice(0, 2),
-      kanbanStatus: 'backlog',
+      id: '1',
       taskNumber: 'TASK-001',
-      openedDate: '2025-04-15',
+      title: 'Conception de l\'interface utilisateur',
+      openedDate: '10 octobre 2023',
       openedBy: 'John Doe',
-      status: 'Open',
-      timeSpent: '5',
-      assignedTo: teamMembers[0],
-      projectId: 'project-1',
-      openedDaysAgo: 10,
-      priority: 'high'
+      status: 'Completed',
+      timeSpent: '10h',
+      assignedTo: {
+        id: '1',
+        name: 'John Doe',
+        avatar: '/api/placeholder/40/40'
+      },
+      description: 'Création des maquettes et prototypes pour l\'interface utilisateur du tableau Kanban',
+      comments: 5,
+      attachments: 2,
+      projectId: '1',
+      kanbanStatus: 'completed'
     },
     {
-      id: 'task-2',
-      title: 'Création des wireframes',
-      description: 'Concevoir des wireframes pour la nouvelle interface utilisateur basés sur les résultats de la recherche.',
-      days: 7,
-      comments: 6,
-      attachments: 4,
-      assignees: users.slice(1, 3),
-      kanbanStatus: 'backlog',
+      id: '2',
       taskNumber: 'TASK-002',
-      openedDate: '2025-04-16',
-      openedBy: 'Jane Smith',
-      status: 'Open',
-      timeSpent: '7',
-      assignedTo: teamMembers[1],
-      projectId: 'project-1',
-      openedDaysAgo: 9,
-      priority: 'medium'
+      title: 'Développement du backend API',
+      openedDate: '15 octobre 2023',
+      openedBy: 'Marie Dupont',
+      status: 'InProgress',
+      timeSpent: '15h',
+      assignedTo: {
+        id: '2',
+        name: 'Marie Dupont',
+        avatar: '/api/placeholder/40/40'
+      },
+      description: 'Création des endpoints API pour la gestion des tâches et projets',
+      comments: 3,
+      attachments: 1,
+      projectId: '1',
+      kanbanStatus: 'in-progress'
     },
     {
-      id: 'task-3',
-      title: 'Cartographie des flux utilisateurs',
-      description: 'Cartographier le flux utilisateur pour les fonctionnalités clés de la plateforme afin d\'identifier les améliorations.',
-      days: 4,
-      comments: 2,
-      attachments: 1,
-      assignees: users.slice(0, 1),
-      kanbanStatus: 'in-progress',
+      id: '3',
       taskNumber: 'TASK-003',
-      openedDate: '2025-04-17',
-      openedBy: 'Alex Johnson',
-      status: 'InProgress',
-      timeSpent: '4',
-      assignedTo: teamMembers[2],
-      projectId: 'project-1',
-      openedDaysAgo: 8,
-      priority: 'high'
+      title: 'Intégration front-end avec l\'API',
+      openedDate: '20 octobre 2023',
+      openedBy: 'Alex Martin',
+      status: 'Open',
+      timeSpent: '0h',
+      assignedTo: {
+        id: '3',
+        name: 'Alex Martin',
+        avatar: '/api/placeholder/40/40'
+      },
+      description: 'Connecter l\'interface utilisateur avec les endpoints du backend',
+      comments: 1,
+      attachments: 0,
+      projectId: '1',
+      kanbanStatus: 'backlog'
     },
     {
-      id: 'task-4',
-      title: 'Design d\'interface',
-      description: 'Créer des maquettes haute-fidélité basées sur les wireframes approuvés.',
-      days: 8,
-      comments: 4,
-      attachments: 8,
-      assignees: users.slice(1, 2),
-      kanbanStatus: 'in-progress',
+      id: '4',
       taskNumber: 'TASK-004',
-      openedDate: '2025-04-18',
+      title: 'Tests d\'intégration',
+      openedDate: '25 octobre 2023',
       openedBy: 'John Doe',
-      status: 'InProgress',
-      timeSpent: '8',
-      assignedTo: teamMembers[0],
-      projectId: 'project-1',
-      openedDaysAgo: 7,
-      priority: 'medium'
-    },
-    {
-      id: 'task-5',
-      title: 'Plan de test d\'utilisabilité',
-      description: 'Créer un plan de test pour évaluer le nouveau design avec de vrais utilisateurs.',
-      days: 3,
-      comments: 2,
-      attachments: 1,
-      assignees: users.slice(1, 2),
-      kanbanStatus: 'completed',
-      taskNumber: 'TASK-005',
-      openedDate: '2025-04-19',
-      openedBy: 'Jane Smith',
-      status: 'Completed',
-      timeSpent: '3',
-      assignedTo: teamMembers[1],
-      projectId: 'project-1',
-      openedDaysAgo: 6,
-      priority: 'low'
-    },
-    {
-      id: 'task-6',
-      title: 'Mises à jour du système de design',
-      description: 'Mettre à jour le système de design pour inclure de nouveaux composants et modèles.',
-      days: 6,
-      comments: 7,
-      attachments: 3,
-      assignees: users,
-      kanbanStatus: 'completed',
-      taskNumber: 'TASK-006',
-      openedDate: '2025-04-20',
-      openedBy: 'Alex Johnson',
-      status: 'Completed',
-      timeSpent: '6',
-      assignedTo: teamMembers[2],
-      projectId: 'project-1',
-      openedDaysAgo: 5,
-      priority: 'low'
+      status: 'Open',
+      timeSpent: '0h',
+      assignedTo: {
+        id: '1',
+        name: 'John Doe',
+        avatar: '/api/placeholder/40/40'
+      },
+      description: 'Créer et exécuter des tests d\'intégration pour l\'application',
+      comments: 0,
+      attachments: 0,
+      projectId: '1',
+      kanbanStatus: 'backlog'
     }
   ];
-  
+
   return { project, tasks };
 };
 
@@ -188,6 +155,9 @@ const ProjectDetailPage: React.FC = () => {
   const [showNewTaskModal, setShowNewTaskModal] = useState<boolean>(false);
   const [newTaskColumnStatus, setNewTaskColumnStatus] = useState<'backlog' | 'in-progress' | 'completed' | null>(null);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteData, setInviteData] = useState({ email: '', message: '' });
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   
   // Utilisateur actuel simulé
   const [currentUser, setCurrentUser] = useState<User>({
@@ -223,6 +193,16 @@ const ProjectDetailPage: React.FC = () => {
     };
   }, [draggedTaskId]);
 
+  // Gestion des notifications
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
   // Filtrer les tâches en fonction de la recherche
   const filteredTasks = tasks.filter(task =>
     task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -240,28 +220,6 @@ const ProjectDetailPage: React.FC = () => {
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
     setDraggedTaskId(taskId);
-    
-    // Créer une image fantôme pour améliorer l'expérience de drag
-    const draggedTask = tasks.find(t => t.id === taskId);
-    if (draggedTask) {
-      const ghostImage = document.createElement('div');
-      ghostImage.classList.add('bg-[var(--bg-primary)]', 'p-3', 'rounded', 'shadow-lg', 'text-sm', 'max-w-xs');
-      ghostImage.innerHTML = `
-        <div class="font-medium text-[var(--text-primary)]">${draggedTask.title}</div>
-        <div class="text-xs text-[var(--text-secondary)]">${draggedTask.taskNumber}</div>
-      `;
-      document.body.appendChild(ghostImage);
-      ghostImage.style.position = 'absolute';
-      ghostImage.style.top = '-1000px';
-      ghostImage.style.opacity = '0.9';
-      
-      e.dataTransfer.setDragImage(ghostImage, 20, 20);
-      
-      // Nettoyer l'élément fantôme après un court délai
-      setTimeout(() => {
-        document.body.removeChild(ghostImage);
-      }, 0);
-    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -272,56 +230,17 @@ const ProjectDetailPage: React.FC = () => {
   const handleDrop = (e: React.DragEvent, targetStatus: 'backlog' | 'in-progress' | 'completed') => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData('taskId');
-    setDraggedTaskId(null);
     
-    if (!taskId) return; // Vérifier que l'ID de tâche est présent
-    
-    const draggedTask = tasks.find(task => task.id === taskId);
-    if (!draggedTask) return; // Vérifier que la tâche existe
-    
-    // Ne rien faire si la tâche est déjà dans la colonne cible
-    if (draggedTask.kanbanStatus === targetStatus) return;
-    
-    // Traduire les statuts pour les notifications
-    const getStatusName = (status: 'backlog' | 'in-progress' | 'completed') => {
-      switch(status) {
-        case 'backlog': return 'À faire';
-        case 'in-progress': return 'En cours';
-        case 'completed': return 'Terminé';
+    // Mettre à jour le statut de la tâche
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        return { ...task, kanbanStatus: targetStatus };
       }
-    };
+      return task;
+    });
     
-    // Mettre à jour l'état des tâches
-    setTasks(prevTasks => 
-      prevTasks.map(task => {
-        if (task.id === taskId) {
-          // Mettre à jour à la fois kanbanStatus et status
-          let newStatus: Task['status'] = task.status;
-          
-          switch(targetStatus) {
-            case 'backlog':
-              newStatus = 'Open';
-              break;
-            case 'in-progress':
-              newStatus = 'InProgress';
-              break;
-            case 'completed':
-              newStatus = 'Completed';
-              break;
-          }
-          
-          // Ajouter une notification ou un toast ici dans une application réelle
-          console.log(`Tâche "${task.title}" déplacée vers "${getStatusName(targetStatus)}"`);
-          
-          return { 
-            ...task, 
-            kanbanStatus: targetStatus,
-            status: newStatus
-          };
-        }
-        return task;
-      })
-    );
+    setTasks(updatedTasks);
+    setDraggedTaskId(null);
   };
 
   // Gestionnaire de clic sur une tâche
@@ -342,39 +261,164 @@ const ProjectDetailPage: React.FC = () => {
   
   // Gestionnaire pour sauvegarder une nouvelle tâche
   const handleSaveNewTask = (newTaskData: Partial<Task>) => {
-    if (newTaskColumnStatus && project) {
-      const newTask: Task = {
-        id: `task-${Date.now()}`,
-        title: newTaskData.title || 'Nouvelle tâche',
-        description: newTaskData.description || '',
-        days: newTaskData.days || 0,
-        comments: 0,
-        attachments: newTaskData.attachments || 0,
-        assignees: newTaskData.assignees || [],
-        kanbanStatus: newTaskColumnStatus,
-        taskNumber: `TASK-${(tasks.length + 1).toString().padStart(3, '0')}`,
-        openedDate: new Date().toISOString().split('T')[0],
-        openedBy: currentUser.name,
-        status: newTaskData.status || (
-          newTaskColumnStatus === 'backlog' ? 'Open' : 
-          newTaskColumnStatus === 'in-progress' ? 'InProgress' : 'Completed'
-        ),
-        timeSpent: '0',
-        assignedTo: newTaskData.assignedTo || {
-          id: currentUser.id,
-          name: currentUser.name,
-          avatar: currentUser.avatar
-        },
-        projectId: newTaskData.projectId || project.id,
-        openedDaysAgo: 0,
-        priority: newTaskData.priority || 'medium',
-        subtasks: newTaskData.subtasks || []
-      };
-      
-      setTasks(prevTasks => [...prevTasks, newTask]);
-      setShowNewTaskModal(false);
-      setNewTaskColumnStatus(null);
+    if (!project) return;
+    
+    const newTask: Task = {
+      id: `task-${Date.now()}`,
+      taskNumber: `TASK-${100 + tasks.length}`,
+      title: newTaskData.title || 'Nouvelle tâche',
+      openedDate: new Date().toLocaleDateString('fr-FR'),
+      openedBy: currentUser.name,
+      status: 'Open',
+      timeSpent: '0h',
+      assignedTo: newTaskData.assignedTo || currentUser,
+      description: newTaskData.description || '',
+      comments: 0,
+      attachments: 0,
+      projectId: project.id,
+      kanbanStatus: newTaskData.kanbanStatus || 'backlog'
+    };
+    
+    // Ajouter la nouvelle tâche
+    setTasks(prevTasks => [...prevTasks, newTask]);
+    
+    // Fermer le modal
+    setShowNewTaskModal(false);
+    setNewTaskColumnStatus(null);
+  };
+
+  // Ouvrir le modal d'invitation
+  const handleOpenInviteModal = () => {
+    setShowInviteModal(true);
+    setInviteData({ email: '', message: '' });
+  };
+
+  // Gérer l'envoi d'invitation
+  const handleInviteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Vérification de l'email
+    if (!inviteData.email || !inviteData.email.includes('@')) {
+      setNotification({
+        message: 'Veuillez entrer une adresse email valide',
+        type: 'error'
+      });
+      return;
     }
+
+    // Simulation d'envoi d'email d'invitation
+    console.log('Invitation envoyée à:', inviteData.email, 'pour le projet:', projectId);
+    
+    // Notification de succès
+    setNotification({
+      message: `Invitation envoyée à ${inviteData.email}`,
+      type: 'success'
+    });
+    
+    // Fermer le modal et réinitialiser les données
+    setShowInviteModal(false);
+    setInviteData({ email: '', message: '' });
+  };
+
+  // Notification de succès ou d'erreur
+  const renderNotification = () => {
+    if (!notification) return null;
+    
+    return (
+      <div className={`fixed bottom-4 right-4 px-6 py-3 rounded-md shadow-lg ${
+        notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+      } text-white z-50 flex items-center`}>
+        {notification.type === 'success' ? (
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        ) : (
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        )}
+        {notification.message}
+      </div>
+    );
+  };
+
+  // Modal d'invitation d'utilisateur à un projet
+  const renderInviteModal = () => {
+    if (!showInviteModal) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div className="bg-[var(--bg-primary)] rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+              Inviter un collaborateur au projet
+            </h3>
+            <button 
+              onClick={() => setShowInviteModal(false)}
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            >
+              ✕
+            </button>
+          </div>
+          
+          {project && (
+            <div className="mb-4 p-3 bg-[var(--bg-secondary)] rounded-md">
+              <p className="text-sm font-medium text-[var(--text-primary)]">Projet : {project.title}</p>
+              <p className="text-xs text-[var(--text-secondary)]">{project.description}</p>
+            </div>
+          )}
+          
+          <form onSubmit={handleInviteSubmit}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                Adresse email <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center">
+                <div className="mr-2 text-[var(--text-secondary)]">
+                  <FaEnvelope />
+                </div>
+                <input
+                  type="email"
+                  required
+                  placeholder="utilisateur@example.com"
+                  className="flex-1 pl-2 pr-4 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)]"
+                  value={inviteData.email}
+                  onChange={(e) => setInviteData({...inviteData, email: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[var(--text-primary)] mb-1">
+                Message personnel
+              </label>
+              <textarea
+                placeholder="Nous aimerions que vous rejoigniez notre projet..."
+                className="w-full pl-4 pr-4 py-2 border border-[var(--border-color)] rounded-md bg-[var(--bg-secondary)] text-[var(--text-primary)] h-24"
+                value={inviteData.message}
+                onChange={(e) => setInviteData({...inviteData, message: e.target.value})}
+              ></textarea>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={() => setShowInviteModal(false)}
+                className="px-4 py-2 border border-[var(--border-color)] rounded-md text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white rounded-md"
+              >
+                Envoyer l'invitation
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
   };
   
   // État de chargement
@@ -417,6 +461,31 @@ const ProjectDetailPage: React.FC = () => {
                 Échéance: <span className="font-medium">{project.dueDate}</span>
               </div>
             </div>
+          </div>
+
+          {/* Section des membres d'équipe avec bouton d'invitation */}
+          <div className="mt-4 flex flex-wrap items-center">
+            <div className="mr-4 mb-2">
+              <span className="text-sm font-medium text-[var(--text-secondary)]">Équipe :</span>
+            </div>
+            <div className="flex -space-x-2 mr-3 mb-2">
+              {project.teamMembers.map((member) => (
+                <img
+                  key={member.id}
+                  src={member.avatar}
+                  alt={member.name}
+                  title={member.name}
+                  className="w-8 h-8 rounded-full border-2 border-[var(--bg-primary)]"
+                />
+              ))}
+            </div>
+            <button 
+              onClick={handleOpenInviteModal}
+              className="mb-2 flex items-center text-sm bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white px-3 py-1.5 rounded-md transition-colors"
+            >
+              <FaUserPlus className="mr-1.5" />
+              Inviter un collaborateur
+            </button>
           </div>
         </div>
         
@@ -499,7 +568,7 @@ const ProjectDetailPage: React.FC = () => {
         />
       )}
       
-      {/* Utilisation du composant CreateTaskModal au lieu du modal simple */}
+      {/* Utilisation du composant CreateTaskModal */}
       {showNewTaskModal && project && (
         <CreateTaskModal
           isOpen={showNewTaskModal}
@@ -518,6 +587,12 @@ const ProjectDetailPage: React.FC = () => {
           users={project.teamMembers}
         />
       )}
+
+      {/* Modal d'invitation */}
+      {renderInviteModal()}
+      
+      {/* Notification */}
+      {renderNotification()}
     </div>
   );
 };

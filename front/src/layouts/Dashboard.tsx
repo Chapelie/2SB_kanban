@@ -3,6 +3,8 @@ import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { User } from '../types';
+import TutorialManager from '../components/tutorial/TutorialManager';
+import { useTutorial, getDashboardTutorialSteps } from '../contexts/TutorialContext';
 
 interface DashboardProps {
   user: User;
@@ -12,7 +14,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activePage, setActivePage] = useState('project');
-
+  const { showTutorial, setShowTutorial, tutorialCompleted, markTutorialAsCompleted, skipTutorial } = useTutorial();
+  
   // Mettre à jour la page active en fonction de l'URL
   useEffect(() => {
     const path = location.pathname.split('/').pop() || '';
@@ -22,6 +25,18 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     else if (path === 'performance') setActivePage('performance');
     else if (path === 'settings') setActivePage('settings');
   }, [location]);
+
+  // Vérifier si c'est la première visite de l'utilisateur
+  useEffect(() => {
+    // Pour le développement/test, nous forçons l'affichage du tutoriel
+    if (location.pathname.includes('/projects')) {
+      const timer = setTimeout(() => {
+        setShowTutorial(true);
+      }, 1000); // Délai d'1 seconde pour laisser le dashboard se charger
+      
+      return () => clearTimeout(timer);
+    }
+  }, [setShowTutorial, location.pathname]);
 
   // Fonction pour naviguer via la sidebar
   const handleNavigate = (page: string) => {
@@ -51,11 +66,19 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   return (
     <div className="flex h-screen">
-      <Sidebar activePage={activePage} onNavigate={handleNavigate} />
+      <Sidebar id="sidebar-navigation" activePage={activePage} onNavigate={handleNavigate} />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header user={user} activePage={activePage} />
         <Outlet />
       </div>
+      
+      {/* Tutoriel */}
+      <TutorialManager
+        steps={getDashboardTutorialSteps()}
+        isActive={showTutorial}
+        onComplete={markTutorialAsCompleted}
+        onSkip={skipTutorial}
+      />
     </div>
   );
 };
