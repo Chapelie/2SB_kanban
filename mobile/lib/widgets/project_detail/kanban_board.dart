@@ -87,16 +87,19 @@ class _KanbanBoardState extends State<KanbanBoard>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return RefreshIndicator(
       onRefresh: () async => widget.onRefresh(),
       child: Column(
         children: [
           // Indicateur de position élégant
-          _buildPageIndicator(),
+          _buildPageIndicator(isDarkMode),
 
           // Tableau Kanban avec PageView
           Expanded(
-            child: _buildKanbanPageView(),
+            child: _buildKanbanPageView(isDarkMode),
           ),
         ],
       ),
@@ -104,7 +107,7 @@ class _KanbanBoardState extends State<KanbanBoard>
   }
 
   // Indicateur de page amélioré
-  Widget _buildPageIndicator() {
+  Widget _buildPageIndicator(bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       color: Colors.transparent,
@@ -120,8 +123,11 @@ class _KanbanBoardState extends State<KanbanBoard>
                 height: 8,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 decoration: BoxDecoration(
-                  color:
-                      _currentPage == i ? _columnColors[i] : Colors.grey[300],
+                  color: _currentPage == i
+                      ? _columnColors[i]
+                      : isDarkMode
+                          ? Colors.grey[700]
+                          : Colors.grey[300],
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -132,23 +138,37 @@ class _KanbanBoardState extends State<KanbanBoard>
   }
 
   // PageView pour les colonnes Kanban
-  Widget _buildKanbanPageView() {
+  Widget _buildKanbanPageView(bool isDarkMode) {
     return PageView.builder(
       controller: _pageController,
       itemCount: _statuses.length,
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: _buildKanbanColumn(
-              _statuses[index], _columns[index], _columnColors[index], index),
+          child: _buildKanbanColumn(_statuses[index], _columns[index],
+              _columnColors[index], index, isDarkMode),
         );
       },
     );
   }
 
   // Colonne Kanban
-  Widget _buildKanbanColumn(
-      TaskStatus status, String title, Color color, int columnIndex) {
+  Widget _buildKanbanColumn(TaskStatus status, String title, Color color,
+      int columnIndex, bool isDarkMode) {
+    final theme = Theme.of(context);
+
+    // Couleurs adaptées au mode sombre
+    final columnBgColor = isDarkMode
+        ? Color.alphaBlend(
+            theme.cardColor.withOpacity(0.2), Colors.grey.shade900)
+        : Colors.white;
+
+    final borderColor = isDarkMode ? color.withOpacity(0.5) : Colors.grey[300]!;
+
+    final shadowColor = isDarkMode
+        ? Colors.black.withOpacity(0.25)
+        : Colors.black.withOpacity(0.05);
+
     return DragTarget<Task>(
       builder: (context, candidateItems, rejectedItems) {
         final isHovered = candidateItems.isNotEmpty;
@@ -157,16 +177,21 @@ class _KanbanBoardState extends State<KanbanBoard>
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: Colors.white,
+            color: columnBgColor,
             border: Border.all(
-              color: isHovered ? color : Colors.grey[300]!,
-              width: isHovered ? 2 : 1,
+              color: isHovered ? color : borderColor,
+              width: isHovered
+                  ? 2
+                  : isDarkMode
+                      ? 1.5
+                      : 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: shadowColor,
                 blurRadius: 6,
                 offset: const Offset(0, 3),
+                spreadRadius: isDarkMode ? 1 : 0,
               ),
             ],
           ),
@@ -174,18 +199,21 @@ class _KanbanBoardState extends State<KanbanBoard>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // En-tête de la colonne
-              _buildColumnHeader(status, title, color),
+              _buildColumnHeader(status, title, color, isDarkMode),
 
               // Contenu de la colonne
               Expanded(
                 child: Container(
-                  color: isHovered ? color.withOpacity(0.05) : null,
-                  child: _buildColumnContent(status, title, color, isHovered),
+                  color: isHovered
+                      ? color.withOpacity(isDarkMode ? 0.1 : 0.05)
+                      : null,
+                  child: _buildColumnContent(
+                      status, title, color, isHovered, isDarkMode),
                 ),
               ),
 
               // Pied de colonne (bouton ou indicateur de dépôt)
-              _buildColumnFooter(status, title, color, isHovered),
+              _buildColumnFooter(status, title, color, isHovered, isDarkMode),
             ],
           ),
         );
@@ -238,19 +266,20 @@ class _KanbanBoardState extends State<KanbanBoard>
   }
 
   // En-tête de colonne
-  Widget _buildColumnHeader(TaskStatus status, String title, Color color) {
+  Widget _buildColumnHeader(
+      TaskStatus status, String title, Color color, bool isDarkMode) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withOpacity(isDarkMode ? 0.2 : 0.1),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(11),
           topRight: Radius.circular(11),
         ),
         border: Border(
           bottom: BorderSide(
-            color: color.withOpacity(0.3),
-            width: 1,
+            color: color.withOpacity(isDarkMode ? 0.4 : 0.3),
+            width: isDarkMode ? 1.5 : 1,
           ),
         ),
       ),
@@ -278,24 +307,33 @@ class _KanbanBoardState extends State<KanbanBoard>
           Consumer<TaskController>(
             builder: (context, taskController, _) {
               final count = taskController.getTasksByStatus(status).length;
+              final bgColor = isDarkMode ? Colors.grey.shade800 : Colors.white;
+              final textColor = isDarkMode ? color.withOpacity(0.9) : color;
+
               return Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: bgColor,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: color.withOpacity(0.2),
+                      color: color.withOpacity(isDarkMode ? 0.3 : 0.2),
                       blurRadius: 2,
                       offset: const Offset(0, 1),
                     ),
                   ],
+                  border: isDarkMode
+                      ? Border.all(
+                          color: color.withOpacity(0.3),
+                          width: 1,
+                        )
+                      : null,
                 ),
                 child: Text(
                   count.toString(),
                   style: TextStyle(
-                    color: color,
+                    color: textColor,
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -309,14 +347,14 @@ class _KanbanBoardState extends State<KanbanBoard>
   }
 
   // Contenu de la colonne
-  Widget _buildColumnContent(
-      TaskStatus status, String title, Color color, bool isHovered) {
+  Widget _buildColumnContent(TaskStatus status, String title, Color color,
+      bool isHovered, bool isDarkMode) {
     return Consumer<TaskController>(
       builder: (context, taskController, _) {
         final tasks = taskController.getTasksByStatus(status);
 
         if (tasks.isEmpty) {
-          return _buildEmptyColumn(status, color, isHovered);
+          return _buildEmptyColumn(status, color, isHovered, isDarkMode);
         }
 
         return ListView.builder(
@@ -324,7 +362,7 @@ class _KanbanBoardState extends State<KanbanBoard>
           itemCount: tasks.length,
           itemBuilder: (context, index) {
             final task = tasks[index];
-            return _buildDraggableTaskCard(task, color);
+            return _buildDraggableTaskCard(task, color, isDarkMode);
           },
         );
       },
@@ -332,13 +370,24 @@ class _KanbanBoardState extends State<KanbanBoard>
   }
 
   // Pied de colonne
-  Widget _buildColumnFooter(
-      TaskStatus status, String title, Color color, bool isHovered) {
+  Widget _buildColumnFooter(TaskStatus status, String title, Color color,
+      bool isHovered, bool isDarkMode) {
     if (status == TaskStatus.open) {
+      final bgColor = isDarkMode
+          ? Color.alphaBlend(
+              Colors.grey.shade900.withOpacity(0.5), Colors.white)
+          : Colors.white;
+
+      final buttonColor =
+          isDarkMode ? color.withOpacity(0.15) : color.withOpacity(0.1);
+
+      final textColor =
+          isDarkMode ? color.withOpacity(0.9) : color.withOpacity(0.8);
+
       return Container(
         padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: bgColor,
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(11),
             bottomRight: Radius.circular(11),
@@ -346,7 +395,7 @@ class _KanbanBoardState extends State<KanbanBoard>
         ),
         child: Material(
           borderRadius: BorderRadius.circular(8),
-          color: color.withOpacity(0.1),
+          color: buttonColor,
           child: InkWell(
             onTap: widget.onAddTask,
             borderRadius: BorderRadius.circular(8),
@@ -358,13 +407,13 @@ class _KanbanBoardState extends State<KanbanBoard>
                   Icon(
                     Icons.add_circle_outline,
                     size: 18,
-                    color: color.withOpacity(0.8),
+                    color: textColor,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Ajouter une tâche',
                     style: TextStyle(
-                      color: color.withOpacity(0.8),
+                      color: textColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -380,7 +429,7 @@ class _KanbanBoardState extends State<KanbanBoard>
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withOpacity(isDarkMode ? 0.15 : 0.1),
           borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(11),
             bottomRight: Radius.circular(11),
@@ -394,7 +443,7 @@ class _KanbanBoardState extends State<KanbanBoard>
             Text(
               'Déposer ici',
               style: TextStyle(
-                color: color,
+                color: isDarkMode ? color.withOpacity(0.9) : color,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -407,7 +456,8 @@ class _KanbanBoardState extends State<KanbanBoard>
   }
 
   // Carte de tâche glissable
-  Widget _buildDraggableTaskCard(Task task, Color columnColor) {
+  Widget _buildDraggableTaskCard(
+      Task task, Color columnColor, bool isDarkMode) {
     return Draggable<Task>(
       data: task,
       feedback: Material(
@@ -454,9 +504,12 @@ class _KanbanBoardState extends State<KanbanBoard>
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 3,
+              color: isDarkMode
+                  ? Colors.black.withOpacity(0.2)
+                  : Colors.black.withOpacity(0.05),
+              blurRadius: isDarkMode ? 4 : 3,
               offset: const Offset(0, 1),
+              spreadRadius: isDarkMode ? 1 : 0,
             ),
           ],
         ),
@@ -503,6 +556,93 @@ class _KanbanBoardState extends State<KanbanBoard>
     );
   }
 
+  // Colonne vide
+  Widget _buildEmptyColumn(
+      TaskStatus status, Color color, bool isHovered, bool isDarkMode) {
+    final emptyTextColor = isDarkMode ? Colors.grey[400] : Colors.grey[600];
+
+    final titleColor = isDarkMode ? color.withOpacity(0.9) : color;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(isDarkMode ? 0.2 : 0.1),
+                shape: BoxShape.circle,
+                border: isDarkMode
+                    ? Border.all(
+                        color: color.withOpacity(0.3),
+                        width: 1,
+                      )
+                    : null,
+              ),
+              child: Icon(
+                _getIconForStatus(status),
+                size: 24,
+                color: color.withOpacity(isDarkMode ? 0.8 : 0.6),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _getEmptyTitle(status),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: titleColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _getEmptyMessage(status),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: emptyTextColor,
+                fontSize: 13,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Zone de dépôt visuelle
+            if (_draggingTask != null && isHovered)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(isDarkMode ? 0.2 : 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: color.withOpacity(isDarkMode ? 0.5 : 0.3),
+                    width: isDarkMode ? 1.5 : 1,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add_task, size: 18, color: titleColor),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Déposer ici',
+                      style: TextStyle(
+                        color: titleColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // Indicateur de priorité
   Widget _buildPriorityIndicator(TaskPriority priority, Color columnColor) {
     Color priorityColor;
@@ -541,80 +681,6 @@ class _KanbanBoardState extends State<KanbanBoard>
   }
 
   // Colonne vide
-  Widget _buildEmptyColumn(TaskStatus status, Color color, bool isHovered) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                _getIconForStatus(status),
-                size: 24,
-                color: color.withOpacity(0.6),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              _getEmptyTitle(status),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _getEmptyMessage(status),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 13,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Zone de dépôt visuelle
-            if (_draggingTask != null && isHovered)
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: color.withOpacity(0.3),
-                    width: 1,
-                    style: BorderStyle.solid,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.add_task, size: 18, color: color),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Déposer ici',
-                      style: TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
 
   // Titre pour colonne vide
   String _getEmptyTitle(TaskStatus status) {

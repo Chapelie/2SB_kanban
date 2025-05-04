@@ -12,6 +12,7 @@ class Project {
   final List<TeamMember> teamMembers;
   final DateTime createdAt;
   final String ownerId;
+  final bool isFavorite; // Ajout du champ pour les projets favoris
   
   const Project({
     required this.id,
@@ -23,6 +24,7 @@ class Project {
     this.teamMembers = const [],
     required this.createdAt,
     required this.ownerId,
+    this.isFavorite = false, // Valeur par défaut
   });
   
   // Calcul des jours restants jusqu'à échéance
@@ -59,6 +61,7 @@ class Project {
     'teamMembers': teamMembers.map((member) => member.toJson()).toList(),
     'createdAt': createdAt.toIso8601String(),
     'ownerId': ownerId,
+    'isFavorite': isFavorite, // Inclure dans le JSON
   };
   
   // Créer un objet Project à partir de JSON
@@ -82,6 +85,34 @@ class Project {
           ? DateTime.parse(json['createdAt']) 
           : DateTime.now(),
       ownerId: json['ownerId'] ?? '',
+      isFavorite: json['isFavorite'] ?? false, // Récupérer depuis le JSON
+    );
+  }
+  
+  // Créer une copie du projet avec des modifications
+  Project copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? dueDate,
+    ProjectStatus? status,
+    int? issuesCount,
+    List<TeamMember>? teamMembers,
+    DateTime? createdAt,
+    String? ownerId,
+    bool? isFavorite,
+  }) {
+    return Project(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      dueDate: dueDate ?? this.dueDate,
+      status: status ?? this.status,
+      issuesCount: issuesCount ?? this.issuesCount,
+      teamMembers: teamMembers ?? this.teamMembers,
+      createdAt: createdAt ?? this.createdAt,
+      ownerId: ownerId ?? this.ownerId,
+      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 }

@@ -5,6 +5,7 @@ import 'config/themes.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/project_controller.dart';
 import 'controllers/task_controller.dart';
+import 'providers/theme_provider.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -19,6 +20,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthController()),
         ChangeNotifierProvider(create: (_) => ProjectController()),
         ChangeNotifierProvider(create: (_) => TaskController()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+
       ],
       child: const MyApp(),
     ),

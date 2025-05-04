@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../views/login_screen.dart';
-import '../views/register_screen.dart';
-import '../views/forgot_password_screen.dart';
-import '../views/project_list_screen.dart';
+import '../views/auth/login_screen.dart';
+import '../views/auth/register_screen.dart';
+import '../views/auth/forgot_password_screen.dart';
+import '../views/main/project_list_screen.dart';
 import '../views/project_detail_screen.dart';
-import '../views/home_screen.dart';
+import '../views/main/home_screen.dart';
 import '../views/settings_screen.dart';
-import '../views/my_tasks_screen.dart'; // Ajout de l'import
+import '../views/main/my_tasks_screen.dart'; // Ajout de l'import
 
 class AppRoutes {
   static const String login = '/login';

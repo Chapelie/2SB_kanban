@@ -21,7 +21,7 @@ class TeamMembersSheet extends StatelessWidget {
         if (project == null) {
           return const Center(child: Text('Projet non trouvé'));
         }
-        
+
         return DraggableScrollableSheet(
           initialChildSize: 0.6,
           minChildSize: 0.4,
@@ -44,9 +44,9 @@ class TeamMembersSheet extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Titre
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -67,9 +67,9 @@ class TeamMembersSheet extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Liste des membres
                   Expanded(
                     child: project.teamMembers.isEmpty
@@ -84,7 +84,8 @@ class TeamMembersSheet extends StatelessWidget {
                               return ListTile(
                                 leading: CircleAvatar(
                                   radius: 20,
-                                  backgroundColor: Colors.indigo.withOpacity(0.2),
+                                  backgroundColor:
+                                      Colors.indigo.withOpacity(0.2),
                                   backgroundImage: member.avatar.isNotEmpty
                                       ? NetworkImage(member.avatar)
                                       : null,
@@ -101,13 +102,10 @@ class TeamMembersSheet extends StatelessWidget {
                                 title: Text(member.name),
                                 subtitle: Text(member.location),
                                 trailing: IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-                                  onPressed: () async {
-                                    Navigator.pop(context);
-                                    final confirmed = await _showRemoveMemberConfirmation(context, member);
-                                    if (confirmed) {
-                                      onRemoveMember(project.id, member);
-                                    }
+                                  icon: const Icon(Icons.remove_circle_outline,
+                                      color: Colors.red),
+                                  onPressed: () {
+                                    onRemoveMember(project.id, member);
                                   },
                                 ),
                               );
@@ -121,28 +119,5 @@ class TeamMembersSheet extends StatelessWidget {
         );
       },
     );
-  }
-
-  Future<bool> _showRemoveMemberConfirmation(BuildContext context, TeamMember member) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Retirer le membre'),
-            content: Text(
-                'Êtes-vous sûr de vouloir retirer ${member.name} de l\'équipe du projet ?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Annuler'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Retirer'),
-              ),
-            ],
-          ),
-        ) ??
-        false;
   }
 }

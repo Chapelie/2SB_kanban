@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/project.dart';
+import '../models/task.dart';
 import '../models/team_member.dart';
 import '../services/project_service.dart';
 
@@ -53,14 +54,17 @@ Future<void> fetchProjects() async {
     }
   }
   
-  // Obtenir un projet par son ID (à partir de la liste locale)
+   // Obtenir un projet par son ID (à partir de la liste locale)
   Project? getProjectById(String projectId) {
-    return _projects.firstWhere(
-      (project) => project.id == projectId,
-      orElse: () => null as Project, // Obligé de caster null pour satisfaire le type de retour
-    );
+    try {
+      return _projects.firstWhere(
+        (project) => project.id == projectId,
+      );
+    } catch (e) {
+      // Si aucun projet correspondant n'est trouvé, retourne null
+      return null;
+    }
   }
-
   // Créer un nouveau projet
   Future<Project?> createProject({
     required String title,
@@ -177,6 +181,47 @@ Future<void> fetchProjects() async {
       return false;
     }
   }
+  
+  // Ajouter plusieurs membres à un projet
+  Future<bool> addMembersToProject(String projectId, List<TeamMember> members) async {
+    try {
+      bool success = true;
+      Project? updatedProject;
+      
+      // Ajouter chaque membre individuellement
+      for (final member in members) {
+        updatedProject = await _projectService.addMemberToProject(
+          projectId,
+          member,
+        );
+        
+        if (updatedProject == null) {
+          success = false;
+          break;
+        }
+      }
+      
+      if (success && updatedProject != null) {
+        // Mettre à jour la liste locale
+        final index = _projects.indexWhere((p) => p.id == projectId);
+        if (index >= 0) {
+          _projects[index] = updatedProject;
+        }
+  
+        // Mettre à jour le projet sélectionné si nécessaire
+        if (_selectedProject?.id == projectId) {
+          _selectedProject = updatedProject;
+        }
+  
+        notifyListeners();
+      }
+      
+      return success;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    }
+  }
 
   // Supprimer un membre d'un projet
   Future<bool> removeMemberFromProject(String projectId, String memberId) async {
@@ -241,5 +286,113 @@ Future<void> fetchProjects() async {
   // Retourne les projets en fonction de leur statut
   List<Project> getProjectsByStatus(ProjectStatus status) {
     return _projects.where((project) => project.status == status).toList();
+  }
+  
+  // Ajouter une tâche à un projet
+  Future<bool> addTask(String projectId, Task task) async {
+    _isLoading = true;
+    notifyListeners();
+  
+    try {
+      // Appeler le service pour ajouter la tâche au projet
+      final updatedProject = await _projectService.addTaskToProject(projectId, task);
+      
+      if (updatedProject != null) {
+        // Mettre à jour la liste locale des projets
+        final index = _projects.indexWhere((p) => p.id == projectId);
+        if (index >= 0) {
+          _projects[index] = updatedProject;
+        }
+  
+        // Mettre à jour le projet sélectionné si nécessaire
+        if (_selectedProject?.id == projectId) {
+          _selectedProject = updatedProject;
+        }
+        
+        _error = null;
+        return true;
+      } else {
+        _error = "Échec de l'ajout de la tâche";
+        return false;
+      }
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  // Mettre à jour une tâche dans un projet
+  Future<bool> updateTask(String projectId, Task updatedTask) async {
+    _isLoading = true;
+    notifyListeners();
+  
+    try {
+      // Appeler le service pour mettre à jour la tâche
+      final updatedProject = await _projectService.updateTaskInProject(projectId, updatedTask);
+      
+      if (updatedProject != null) {
+        // Mettre à jour la liste locale des projets
+        final index = _projects.indexWhere((p) => p.id == projectId);
+        if (index >= 0) {
+          _projects[index] = updatedProject;
+        }
+  
+        // Mettre à jour le projet sélectionné si nécessaire
+        if (_selectedProject?.id == projectId) {
+          _selectedProject = updatedProject;
+        }
+        
+        _error = null;
+        return true;
+      } else {
+        _error = "Échec de la mise à jour de la tâche";
+        return false;
+      }
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+  
+  // Supprimer une tâche d'un projet
+  Future<bool> deleteTask(String projectId, String taskId) async {
+    _isLoading = true;
+    notifyListeners();
+  
+    try {
+      // Appeler le service pour supprimer la tâche
+      final updatedProject = await _projectService.deleteTaskFromProject(projectId, taskId);
+      
+      if (updatedProject != null) {
+        // Mettre à jour la liste locale des projets
+        final index = _projects.indexWhere((p) => p.id == projectId);
+        if (index >= 0) {
+          _projects[index] = updatedProject;
+        }
+  
+        // Mettre à jour le projet sélectionné si nécessaire
+        if (_selectedProject?.id == projectId) {
+          _selectedProject = updatedProject;
+        }
+        
+        _error = null;
+        return true;
+      } else {
+        _error = "Échec de la suppression de la tâche";
+        return false;
+      }
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:uuid/uuid.dart';
 import '../models/project.dart';
 import '../models/team_member.dart';
+import '../models/task.dart';
+import 'dart:math' as math;
 import 'storage_service.dart';
 
 class ProjectService {
@@ -138,6 +140,284 @@ class ProjectService {
     );
     
     return updatedProject;
+  }
+  
+  // Récupérer toutes les tâches d'un projet
+  Future<List<Task>> getTasksForProject(String projectId) async {
+    try {
+      // Récupérer toutes les tâches
+      final tasksJson = StorageService.getAll('tasks');
+      List<Task> allTasks = [];
+  
+      for (var taskJson in tasksJson) {
+        if (taskJson is String) {
+          final task = Task.fromJson(json.decode(taskJson));
+          allTasks.add(task);
+        }
+      }
+  
+      // Filtrer les tâches pour ce projet
+      return allTasks.where((task) => task.projectId == projectId).toList();
+    } catch (e) {
+      throw Exception('Erreur lors de la récupération des tâches: $e');
+    }
+  }
+  
+  // Ajouter une tâche à un projet
+  Future<Project> addTaskToProject(String projectId, Task task) async {
+    try {
+      // Récupérer le projet
+      final project = await getProjectById(projectId);
+      
+      // Générer un numéro de tâche s'il n'en a pas déjà un
+      String taskNumber = task.taskNumber;
+      if (taskNumber.isEmpty) {
+        // Générer un numéro de tâche comme "PROJ-0001"
+        final projectCode = project.title.substring(0, math.min(4, project.title.length)).toUpperCase();
+        final random = 1000 + math.Random().nextInt(9000); // Entre 1000 et 9999
+        taskNumber = '$projectCode-$random';
+      }
+      
+      // Créer la tâche finale avec le numéro généré
+      final finalTask = Task(
+        id: task.id,
+        title: task.title,
+        taskNumber: taskNumber,
+        openedDate: task.openedDate,
+        openedBy: task.openedBy,
+        status: task.status,
+        timeSpent: task.timeSpent,
+        assignedTo: task.assignedTo,
+        description: task.description,
+        comments: task.comments,
+        attachments: task.attachments,
+        projectId: projectId,
+        kanbanStatus: task.kanbanStatus,
+        priority: task.priority,
+      );
+      
+      // Enregistrer la tâche
+      await StorageService.save(
+        'tasks',
+        finalTask.id,
+        jsonEncode(finalTask.toJson()),
+      );
+      
+      // Mettre à jour le compteur d'issues dans le projet
+      final tasksCount = (await getTasksForProject(projectId)).length + 1;  // +1 car on vient d'ajouter
+      
+      // Créer un projet mis à jour avec le nouveau nombre d'issues
+      final updatedProject = Project(
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        dueDate: project.dueDate,
+        status: project.status,
+        issuesCount: tasksCount, // Mettre à jour le compteur
+        teamMembers: project.teamMembers,
+        createdAt: project.createdAt,
+        ownerId: project.ownerId,
+        isFavorite: project.isFavorite,
+      );
+      
+      // Enregistrer le projet mis à jour
+      await StorageService.save(
+        'projects',
+        projectId,
+        jsonEncode(updatedProject.toJson()),
+      );
+      
+      return updatedProject;
+    } catch (e) {
+      throw Exception('Erreur lors de l\'ajout de la tâche: $e');
+    }
+  }
+  
+  // Mettre à jour une tâche dans un projet
+  Future<Project> updateTaskInProject(String projectId, Task updatedTask) async {
+    try {
+      // Vérifier si la tâche existe
+      final taskJson = StorageService.get('tasks', updatedTask.id);
+      if (taskJson == null) {
+        throw Exception('Tâche non trouvée');
+      }
+      
+      // Récupérer le projet
+      final project = await getProjectById(projectId);
+      
+      // Enregistrer la tâche mise à jour
+      await StorageService.save(
+        'tasks',
+        updatedTask.id,
+        jsonEncode(updatedTask.toJson()),
+      );
+      
+      // Comme aucune modification au compteur d'issues n'est nécessaire lors d'une mise à jour,
+      // nous retournons simplement le projet inchangé
+      return project;
+    } catch (e) {
+      throw Exception('Erreur lors de la mise à jour de la tâche: $e');
+    }
+  }
+  
+  // Supprimer une tâche d'un projet
+  Future<Project> deleteTaskFromProject(String projectId, String taskId) async {
+    try {
+      // Récupérer le projet
+      final project = await getProjectById(projectId);
+      
+      // Supprimer la tâche
+      await StorageService.delete('tasks', taskId);
+      
+      // Mettre à jour le compteur d'issues dans le projet
+      final tasksCount = (await getTasksForProject(projectId)).length;
+      
+      // Créer un projet mis à jour avec le nouveau nombre d'issues
+      final updatedProject = Project(
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        dueDate: project.dueDate,
+        status: project.status,
+        issuesCount: tasksCount, // Mettre à jour le compteur
+        teamMembers: project.teamMembers,
+        createdAt: project.createdAt,
+        ownerId: project.ownerId,
+        isFavorite: project.isFavorite,
+      );
+      
+      // Enregistrer le projet mis à jour
+      await StorageService.save(
+        'projects',
+        projectId,
+        jsonEncode(updatedProject.toJson()),
+      );
+      
+      return updatedProject;
+    } catch (e) {
+      throw Exception('Erreur lors de la suppression de la tâche: $e');
+    }
+  }
+  
+  // Récupérer une tâche spécifique
+  Future<Task> getTaskById(String taskId) async {
+    final taskJson = StorageService.get('tasks', taskId);
+    if (taskJson == null) {
+      throw Exception('Tâche non trouvée');
+    }
+  
+    return Task.fromJson(json.decode(taskJson));
+  }
+  
+  // Mettre à jour le statut d'une tâche
+  Future<Task> updateTaskStatus(String taskId, TaskStatus newStatus, String newKanbanStatus) async {
+    try {
+      // Récupérer la tâche existante
+      final task = await getTaskById(taskId);
+      
+      // Créer une nouvelle tâche avec le statut mis à jour
+      final updatedTask = Task(
+        id: task.id,
+        title: task.title,
+        taskNumber: task.taskNumber,
+        openedDate: task.openedDate,
+        openedBy: task.openedBy,
+        status: newStatus,
+        timeSpent: task.timeSpent,
+        assignedTo: task.assignedTo,
+        description: task.description,
+        comments: task.comments,
+        attachments: task.attachments,
+        projectId: task.projectId,
+        kanbanStatus: newKanbanStatus,
+        priority: task.priority,
+      );
+      
+      // Enregistrer la tâche mise à jour
+      await StorageService.save(
+        'tasks',
+        taskId,
+        jsonEncode(updatedTask.toJson()),
+      );
+      
+      return updatedTask;
+    } catch (e) {
+      throw Exception('Erreur lors de la mise à jour du statut de la tâche: $e');
+    }
+  }
+  
+  // Assigner une tâche à un membre
+  Future<Task> assignTaskToMember(String taskId, TeamMember member) async {
+    try {
+      // Récupérer la tâche existante
+      final task = await getTaskById(taskId);
+      
+      // Créer une nouvelle tâche avec le membre assigné
+      final updatedTask = Task(
+        id: task.id,
+        title: task.title,
+        taskNumber: task.taskNumber,
+        openedDate: task.openedDate,
+        openedBy: task.openedBy,
+        status: task.status,
+        timeSpent: task.timeSpent,
+        assignedTo: member,
+        description: task.description,
+        comments: task.comments,
+        attachments: task.attachments,
+        projectId: task.projectId,
+        kanbanStatus: task.kanbanStatus,
+        priority: task.priority,
+      );
+      
+      // Enregistrer la tâche mise à jour
+      await StorageService.save(
+        'tasks',
+        taskId,
+        jsonEncode(updatedTask.toJson()),
+      );
+      
+      return updatedTask;
+    } catch (e) {
+      throw Exception('Erreur lors de l\'assignation de la tâche: $e');
+    }
+  }
+  
+  // Mettre à jour la priorité d'une tâche
+  Future<Task> updateTaskPriority(String taskId, TaskPriority newPriority) async {
+    try {
+      // Récupérer la tâche existante
+      final task = await getTaskById(taskId);
+      
+      // Créer une nouvelle tâche avec la priorité mise à jour
+      final updatedTask = Task(
+        id: task.id,
+        title: task.title,
+        taskNumber: task.taskNumber,
+        openedDate: task.openedDate,
+        openedBy: task.openedBy,
+        status: task.status,
+        timeSpent: task.timeSpent,
+        assignedTo: task.assignedTo,
+        description: task.description,
+        comments: task.comments,
+        attachments: task.attachments,
+        projectId: task.projectId,
+        kanbanStatus: task.kanbanStatus,
+        priority: newPriority,
+      );
+      
+      // Enregistrer la tâche mise à jour
+      await StorageService.save(
+        'tasks',
+        taskId,
+        jsonEncode(updatedTask.toJson()),
+      );
+      
+      return updatedTask;
+    } catch (e) {
+      throw Exception('Erreur lors de la mise à jour de la priorité de la tâche: $e');
+    }
   }
   
   // Utilitaire pour obtenir le nom du mois à partir du numéro de mois

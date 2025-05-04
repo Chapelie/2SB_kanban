@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/services/navigation_service.dart';
 import 'package:provider/provider.dart';
-import '../controllers/auth_controller.dart';
-import '../controllers/project_controller.dart';
-import '../controllers/task_controller.dart';
-import '../models/user.dart';
-import '../config/app_routes.dart';
-import '../models/project.dart';
-import '../models/task.dart';
+import '../../controllers/auth_controller.dart';
+import '../../controllers/project_controller.dart';
+import '../../controllers/task_controller.dart';
+import '../../models/user.dart';
+import '../../config/app_routes.dart';
+import '../../models/project.dart';
+import '../../models/task.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -17,41 +18,43 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = false;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     // Utiliser un post-frame callback pour éviter les appels pendant le build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadUserData();
     });
   }
-  
+
   // Modifier la méthode _loadUserData pour être plus sûre
   Future<void> _loadUserData() async {
     if (!mounted) return;
-    
+
     setState(() {
       _isLoading = true;
     });
-  
+
     try {
       // Utiliser listen: false pour tous les providers
-      final projectController = Provider.of<ProjectController>(context, listen: false);
-      final taskController = Provider.of<TaskController>(context, listen: false);
-      
+      final projectController =
+          Provider.of<ProjectController>(context, listen: false);
+      final taskController =
+          Provider.of<TaskController>(context, listen: false);
+
       // Éviter d'appeler fetchProjects et fetchTasks si les données sont déjà chargées
       final futures = <Future>[];
-      
+
       if (projectController.projects.isEmpty && !projectController.isLoading) {
         futures.add(projectController.fetchProjects());
       }
-  
+
       if (taskController.tasks.isEmpty && !taskController.isLoading) {
         futures.add(taskController.fetchTasks());
       }
-      
+
       if (futures.isNotEmpty) {
         await Future.wait(futures);
       }
@@ -75,32 +78,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profil', style: TextStyle(fontWeight: FontWeight.bold)),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.of(context).pushNamed(AppRoutes.settings);
-            },
-          ),
-        ],
-      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadUserData,
-              child: Consumer3<AuthController, ProjectController, TaskController>(
-                builder: (context, authController, projectController, taskController, _) {
+              child:
+                  Consumer3<AuthController, ProjectController, TaskController>(
+                builder: (context, authController, projectController,
+                    taskController, _) {
                   final user = authController.currentUser;
-                  
+
                   if (user == null) {
                     // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.of(context).pushReplacementNamed(AppRoutes.login);
+                      Navigator.of(context)
+                          .pushReplacementNamed(AppRoutes.login);
                     });
                     return const SizedBox();
                   }
@@ -109,13 +101,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 40),
                         // Entête avec avatar et informations utilisateur
                         _buildProfileHeader(user, theme),
 
                         const SizedBox(height: 24),
 
                         // Section Statistiques
-                        _buildStatisticsSection(context, projectController, taskController),
+                        _buildStatisticsSection(
+                            context, projectController, taskController),
 
                         const SizedBox(height: 24),
 
@@ -123,9 +117,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildRecentProjects(context, projectController),
 
                         const SizedBox(height: 24),
-
-                        // Section Tâches actives
-                        _buildActiveTasks(context, taskController, projectController),
 
                         const SizedBox(height: 40),
                       ],
@@ -138,166 +129,179 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader(User user, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.only(bottom: 24.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: [
-            Colors.indigo[700]!,
-            Colors.indigo[400]!,
+            theme.colorScheme.primary.withOpacity(0.9),
+            theme.colorScheme.primary,
           ],
         ),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            offset: const Offset(0, 4),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Column(
         children: [
-          // Avatar et informations utilisateur
-          Center(
-            child: Column(
+          // Zone supérieure avec avatar et informations principales
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 30, 20, 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Avatar avec bouton d'édition
                 Stack(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.white.withOpacity(0.9),
-                      backgroundImage: user.avatar.isNotEmpty
-                          ? NetworkImage(user.avatar)
-                          : null,
-                      child: user.avatar.isEmpty
-                          ? Text(
-                              user.initials,
-                              style: TextStyle(
-                                fontSize: 40,
-                                color: Colors.indigo[700],
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          : null,
+                    Hero(
+                      tag: 'user_avatar',
+                      child: Container(
+                        width: 90,
+                        height: 90,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white,
+                            width: 3,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(45),
+                          child: user.avatar.isNotEmpty
+                              ? Image.network(
+                                  user.avatar,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, _, __) =>
+                                      _buildAvatarFallback(user),
+                                )
+                              : _buildAvatarFallback(user),
+                        ),
+                      ),
                     ),
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: GestureDetector(
-                        onTap: () {
-                          _showEditProfileDialog(context, user);
-                        },
+                      child: InkWell(
+                        onTap: () => _showEditProfileDialog(context, user),
                         child: Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.indigo[700]!,
-                              width: 2,
-                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 5,
+                              ),
+                            ],
                           ),
                           child: Icon(
                             Icons.edit,
-                            color: Colors.indigo[700],
-                            size: 20,
+                            color: theme.colorScheme.primary,
+                            size: 18,
                           ),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  user.name,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  user.email,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
-                  ),
-                ),
-                if (user.location.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+
+                const SizedBox(width: 20),
+
+                // Informations utilisateur
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.location_on,
-                        color: Colors.white70,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
                       Text(
-                        user.location,
+                        user.name,
                         style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.white70,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1.2,
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        user.email,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.8),
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (user.location.isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              size: 14,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              user.location,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      // Badge de rôle supprimé
                     ],
                   ),
-                ],
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.5)),
-                  ),
-                  child: Text(
-                    user.role ?? 'Membre',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
+                ),
+              ],
+            ),
+          ),
+
+          // Section des statistiques supprimée
+
+          const SizedBox(height: 20),
+
+          // Boutons d'action
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildActionButton(
+                    icon: Icons.edit,
+                    label: 'Modifier profil',
+                    onTap: () => _showEditProfileDialog(context, user),
+                    isPrimary: true,
                   ),
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pushNamed(AppRoutes.settings);
-                      },
-                      icon: const Icon(Icons.settings, color: Colors.white),
-                      label: const Text(
-                        'Paramètres',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _showEditProfileDialog(context, user);
-                      },
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Modifier'),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.indigo[700],
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildActionButton(
+                    icon: Icons.settings,
+                    label: 'Paramètres',
+                    onTap: () =>
+                        Navigator.of(context).pushNamed(AppRoutes.settings),
+                    isPrimary: false,
+                  ),
                 ),
               ],
             ),
@@ -307,29 +311,147 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildStatisticsSection(
-      BuildContext context, ProjectController projectController, TaskController taskController) {
+  // Widget pour l'avatar par défaut
+  Widget _buildAvatarFallback(User user) {
+    return Container(
+      color: Colors.indigo.shade300,
+      alignment: Alignment.center,
+      child: Text(
+        user.initials,
+        style: const TextStyle(
+          fontSize: 35,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  // Widget pour les boutons d'action
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required bool isPrimary,
+  }) {
+    return Material(
+      color: isPrimary ? Colors.white : Colors.transparent,
+      borderRadius: BorderRadius.circular(16), // Augmenté de 12 à 16
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16), // Augmenté de 12 à 16
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16), // Augmenté de 12 à 16
+            border: isPrimary ? null : Border.all(color: Colors.white),
+          ),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isPrimary ? Colors.indigo.shade700 : Colors.white,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: isPrimary ? Colors.indigo.shade700 : Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Widget pour l'avatar par défaut
+
+  // Widget pour les statistiques rapides
+  Widget _buildQuickStats(User user) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildStatItem('Projets', '12'),
+        _buildDivider(),
+        _buildStatItem('Tâches', '48'),
+        _buildDivider(),
+        _buildStatItem('Terminées', '32'),
+      ],
+    );
+  }
+
+  Widget _buildStatItem(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            height: 1.2,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white.withOpacity(0.7),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDivider() {
+    return Container(
+      height: 30,
+      width: 1,
+      color: Colors.white.withOpacity(0.3),
+    );
+  }
+
+  // Widget pour les boutons d'action
+  Widget _buildStatisticsSection(BuildContext context,
+      ProjectController projectController, TaskController taskController) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     // Calculer les statistiques à partir des données réelles
     final allProjects = projectController.projects;
     final allTasks = taskController.tasks;
 
-    final projectsCompleted = allProjects.where((p) => p.status == ProjectStatus.completed).length;
-    final projectsInProgress = allProjects.where((p) => p.status == ProjectStatus.ontrack).length;
-    
-    final tasksCompleted = allTasks.where((t) => t.status == TaskStatus.completed).length;
-    final tasksPending = allTasks.where((t) => 
-        t.status == TaskStatus.open || t.status == TaskStatus.inProgress).length;
+    final projectsCompleted =
+        allProjects.where((p) => p.status == ProjectStatus.completed).length;
+    final projectsInProgress =
+        allProjects.where((p) => p.status == ProjectStatus.ontrack).length;
+
+    final tasksCompleted =
+        allTasks.where((t) => t.status == TaskStatus.completed).length;
+    final tasksPending = allTasks
+        .where((t) =>
+            t.status == TaskStatus.open || t.status == TaskStatus.inProgress)
+        .length;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Statistiques',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Colors.black87,
             ),
           ),
           const SizedBox(height: 16),
@@ -383,15 +505,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildStatCard(
       BuildContext context, String title, String value, Color color) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    final cardColor = isDarkMode
+        ? Color.alphaBlend(
+            theme.cardColor.withOpacity(0.2), Colors.grey.shade900)
+        : Colors.white;
+
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+
+    final subtitleColor = isDarkMode ? Colors.grey[400] : Colors.grey[600];
+
+    final shadowColor =
+        isDarkMode ? Colors.black38 : Colors.grey.withOpacity(0.1);
+
+    final borderColor = isDarkMode ? Colors.grey.shade800 : Colors.transparent;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(12),
+        border: isDarkMode ? Border.all(color: borderColor) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
+            color: shadowColor,
+            spreadRadius: isDarkMode ? 0 : 1,
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -403,8 +543,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withOpacity(isDarkMode ? 0.2 : 0.1),
               borderRadius: BorderRadius.circular(8),
+              border:
+                  isDarkMode ? Border.all(color: color.withOpacity(0.4)) : null,
             ),
             child: Icon(
               _getIconForTitle(title),
@@ -415,9 +557,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
+              color: textColor,
             ),
           ),
           const SizedBox(height: 4),
@@ -425,7 +568,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: subtitleColor,
             ),
           ),
         ],
@@ -433,7 +576,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildRecentProjects(BuildContext context, ProjectController projectController) {
+  Widget _buildRecentProjects(
+      BuildContext context, ProjectController projectController) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    final NavigationService navigationService = NavigationService();
     final recentProjects = projectController.projects
         .take(3)
         .toList(); // Prendre les 3 premiers projets
@@ -446,18 +594,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Projets récents',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: isDarkMode ? Colors.white : Colors.black87,
                 ),
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.projectList);
+                  navigationService.navigateToTab(1);
                 },
-                child: const Text('Voir tous'),
+                child: Text(
+                  'Voir tous',
+                  style: TextStyle(
+                    color: theme.primaryColor,
+                  ),
+                ),
               ),
             ],
           ),
@@ -469,7 +623,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Text(
                       'Aucun projet récent',
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                         fontSize: 16,
                       ),
                     ),
@@ -489,6 +643,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProjectCard(Project project) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final size = MediaQuery.of(context).size;
+    final isSmallScreen = size.width < 360;
+
+    // Couleurs adaptées au mode sombre
+    final cardColor = isDarkMode
+        ? Color.alphaBlend(
+            theme.cardColor.withOpacity(0.2), Colors.grey.shade900)
+        : Colors.white;
+
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final subtitleColor = isDarkMode ? Colors.grey[400] : Colors.grey[600];
+    final shadowColor =
+        isDarkMode ? Colors.black38 : Colors.grey.withOpacity(0.1);
+    final borderColor = isDarkMode ? Colors.grey.shade800 : Colors.transparent;
+
     // Simuler une progression en fonction du statut
     String progress;
     Color color;
@@ -521,243 +692,101 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       },
       child: Container(
-        width: 200,
+        width: isSmallScreen ? size.width * 0.75 : 200,
+        height: 160, // Hauteur fixe pour toute la carte
         margin: const EdgeInsets.only(right: 16),
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardColor,
           borderRadius: BorderRadius.circular(12),
+          border: isDarkMode ? Border.all(color: borderColor) : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
+              color: shadowColor,
+              spreadRadius: isDarkMode ? 0 : 1,
               blurRadius: 6,
               offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.folder,
-                    color: color,
-                    size: 20,
-                  ),
-                ),
-                Text(
-                  progress,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              project.title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              project.description,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const Spacer(),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: progressValue,
-                backgroundColor: Colors.grey.withOpacity(0.2),
-                valueColor: AlwaysStoppedAnimation<Color>(color),
-                minHeight: 8,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActiveTasks(BuildContext context, TaskController taskController, ProjectController projectController) {
-    // Récupérer les tâches actives (open et inProgress)
-    final activeTasks = taskController.tasks
-        .where((t) => t.status == TaskStatus.open || t.status == TaskStatus.inProgress)
-        .take(3)
-        .toList(); // Limiter à 3 tâches
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          // Utilisation d'un IntrinsicHeight pour garantir que les enfants ont la hauteur appropriée
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Tâches actives',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Naviguer vers la vue des tâches (aller à l'onglet des tâches dans le home)
-                  Navigator.pushReplacementNamed(context, AppRoutes.home);
-                },
-                child: const Text('Voir toutes'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          activeTasks.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20.0),
-                    child: Text(
-                      'Aucune tâche active',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                )
-              : Column(
-                  children: activeTasks.map((task) {
-                    // Trouver le projet associé à la tâche
-                    final project = projectController.getProjectById(task.projectId);
-                    final projectName = project?.title ?? 'Projet inconnu';
-                    
-                    String deadline = 'Date inconnue';
-                    Color priorityColor;
-                    
-                    switch (task.priority) {
-                      case TaskPriority.high:
-                        priorityColor = Colors.red;
-                        break;
-                      case TaskPriority.medium:
-                        priorityColor = Colors.orange;
-                        break;
-                      case TaskPriority.low:
-                        priorityColor = Colors.green;
-                        break;
-                    }
-                    
-                    return _buildTaskItem(
-                      task.title,
-                      projectName,
-                      '${task.openedDaysAgo} jours',
-                      priorityColor,
-                      onTap: () {
-                        // Naviguer vers les détails de la tâche
-                        _showTaskDetails(context, task, projectName);
-                      },
-                    );
-                  }).toList(),
-                ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTaskItem(
-      String title, String project, String deadline, Color priorityColor, {VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 12,
-              height: 60,
-              decoration: BoxDecoration(
-                color: priorityColor,
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // En-tête avec icône et pourcentage - hauteur fixe
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(isDarkMode ? 0.2 : 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: isDarkMode
+                          ? Border.all(color: color.withOpacity(0.4))
+                          : null,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    child: Icon(
+                      Icons.folder,
+                      color: color,
+                      size: 20,
+                    ),
                   ),
-                  const SizedBox(height: 4),
                   Text(
-                    project,
+                    progress,
                     style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: color,
                     ),
                   ),
                 ],
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: priorityColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    deadline,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: priorityColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+
+              const SizedBox(height: 12),
+
+              // Titre - hauteur fixe
+              Text(
+                project.title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: textColor,
                 ),
-              ],
-            ),
-          ],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+
+              const SizedBox(height: 6),
+
+              // Description avec hauteur contrainte
+              Expanded(
+                child: Text(
+                  project.description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: subtitleColor,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+              // Barre de progression en bas avec marge au-dessus
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: progressValue,
+                  backgroundColor:
+                      Colors.grey.withOpacity(isDarkMode ? 0.3 : 0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                  minHeight: 8,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -794,9 +823,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Numéro et état de la tâche
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -811,9 +840,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _buildStatusChip(task.status),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Titre de la tâche
                   Text(
                     task.title,
@@ -822,9 +851,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Description
                   const Text(
                     'Description',
@@ -835,14 +864,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    task.description.isEmpty ? 'Aucune description' : task.description,
+                    task.description.isEmpty
+                        ? 'Aucune description'
+                        : task.description,
                     style: TextStyle(
                       color: Colors.grey[800],
                     ),
                   ),
-                  
+
                   const Divider(height: 32),
-                  
+
                   // Projet
                   Row(
                     children: [
@@ -895,9 +926,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Autres informations
                   Row(
                     children: [
@@ -937,9 +968,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Assignée à
                   const Text(
                     'Assigné à',
@@ -969,9 +1000,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ],
                         )
                       : const Text('Non assigné'),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Bouton pour ouvrir les détails complets
                   ElevatedButton.icon(
                     onPressed: () {
@@ -1072,7 +1103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                           if (context.mounted) {
                             Navigator.pop(context);
-                            
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
@@ -1080,7 +1111,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ? 'Profil mis à jour avec succès'
                                       : 'Erreur lors de la mise à jour du profil: ${authController.error}',
                                 ),
-                                backgroundColor: success ? Colors.green : Colors.red,
+                                backgroundColor:
+                                    success ? Colors.green : Colors.red,
                               ),
                             );
                           }
@@ -1231,14 +1263,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ? null
                         : () async {
                             if (formKey.currentState!.validate()) {
-                              final success = await authController.changePassword(
+                              final success =
+                                  await authController.changePassword(
                                 currentPasswordController.text,
                                 newPasswordController.text,
                               );
 
                               if (context.mounted) {
                                 Navigator.pop(context);
-                                
+
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
@@ -1246,7 +1279,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           ? 'Mot de passe changé avec succès'
                                           : 'Erreur: ${authController.error}',
                                     ),
-                                    backgroundColor: success ? Colors.green : Colors.red,
+                                    backgroundColor:
+                                        success ? Colors.green : Colors.red,
                                   ),
                                 );
                               }
@@ -1279,7 +1313,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildStatusChip(TaskStatus status) {
     String label;
     Color color;
-    
+
     switch (status) {
       case TaskStatus.open:
         label = 'À faire';
@@ -1298,7 +1332,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color = Colors.red;
         break;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

@@ -12,17 +12,34 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    // Couleurs adaptées au thème
+    final backgroundColor = isDarkMode
+        ? Color.alphaBlend(
+            theme.cardColor.withOpacity(0.2), Colors.grey.shade900)
+        : Colors.white;
+
+    final shadowColor = isDarkMode
+        ? Colors.black.withOpacity(0.2)
+        : Colors.black.withOpacity(0.06);
+
+    final borderColor = isDarkMode ? Colors.grey.shade800 : Colors.transparent;
+
     return Container(
       height: 80,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(30),
+        border: isDarkMode ? Border.all(color: borderColor) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: shadowColor,
             blurRadius: 12,
             offset: const Offset(0, 5),
+            spreadRadius: isDarkMode ? 1 : 0,
           ),
         ],
       ),
@@ -35,6 +52,7 @@ class CustomBottomNavBar extends StatelessWidget {
             icon: Icons.dashboard,
             label: 'Accueil',
             isActive: currentIndex == 0,
+            isDarkMode: isDarkMode,
           ),
           _buildNavItem(
             context: context,
@@ -42,6 +60,7 @@ class CustomBottomNavBar extends StatelessWidget {
             icon: Icons.folder,
             label: 'Projets',
             isActive: currentIndex == 1,
+            isDarkMode: isDarkMode,
           ),
           _buildNavItem(
             context: context,
@@ -49,6 +68,7 @@ class CustomBottomNavBar extends StatelessWidget {
             icon: Icons.task,
             label: 'Tâches',
             isActive: currentIndex == 2,
+            isDarkMode: isDarkMode,
           ),
           _buildNavItem(
             context: context,
@@ -56,6 +76,7 @@ class CustomBottomNavBar extends StatelessWidget {
             icon: Icons.person,
             label: 'Profil',
             isActive: currentIndex == 3,
+            isDarkMode: isDarkMode,
           ),
         ],
       ),
@@ -68,9 +89,29 @@ class CustomBottomNavBar extends StatelessWidget {
     required IconData icon,
     required String label,
     required bool isActive,
+    required bool isDarkMode,
   }) {
-    final Color activeColor = Theme.of(context).colorScheme.primary;
-    final Color inactiveColor = Colors.grey.shade400;
+    final theme = Theme.of(context);
+    final Color activeColor = theme.colorScheme.primary;
+    final Color inactiveColor =
+        isDarkMode ? Colors.grey.shade500 : Colors.grey.shade400;
+
+    // Couleurs adaptées au thème
+    final itemBackgroundColor = isActive
+        ? activeColor
+        : (isDarkMode ? Colors.transparent : Colors.white);
+
+    final itemBorderColor = isActive
+        ? activeColor
+        : (isDarkMode ? Colors.grey.shade700 : Colors.grey.shade200);
+
+    final labelColor = isActive
+        ? activeColor
+        : (isDarkMode ? Colors.grey.shade400 : inactiveColor);
+
+    final iconColor = isActive
+        ? Colors.white
+        : (isDarkMode ? Colors.grey.shade400 : inactiveColor);
 
     return GestureDetector(
       onTap: () => onTap(index),
@@ -82,25 +123,25 @@ class CustomBottomNavBar extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isActive ? activeColor : Colors.white,
+              color: itemBackgroundColor,
               shape: BoxShape.circle,
               border: Border.all(
-                color: isActive ? activeColor : Colors.grey.shade200,
+                color: itemBorderColor,
                 width: 2,
               ),
               boxShadow: isActive
                   ? [
                       BoxShadow(
-                        color: activeColor.withOpacity(0.3),
+                        color: activeColor.withOpacity(isDarkMode ? 0.4 : 0.3),
                         blurRadius: 10,
-                        spreadRadius: 2,
+                        spreadRadius: isDarkMode ? 1 : 2,
                       ),
                     ]
                   : null,
             ),
             child: Icon(
               icon,
-              color: isActive ? Colors.white : inactiveColor,
+              color: iconColor,
               size: 24,
             ),
           ),
@@ -108,7 +149,7 @@ class CustomBottomNavBar extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: isActive ? activeColor : inactiveColor,
+              color: labelColor,
               fontSize: 12,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
             ),

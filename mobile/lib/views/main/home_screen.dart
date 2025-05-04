@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../controllers/auth_controller.dart';
-import '../controllers/project_controller.dart';
-import '../widgets/CustomBottomNavBar.dart';
+import '../../controllers/auth_controller.dart';
+import '../../controllers/project_controller.dart';
+import '../../services/navigation_service.dart';
+import '../../widgets/CustomBottomNavBar.dart';
 import 'dashboard_screen.dart';
 import 'my_tasks_screen.dart';
 import 'profile_screen.dart';
 import 'project_list_screen.dart';
-import '../models/project.dart';
+import '../../models/project.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -17,6 +18,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final NavigationService _navigationService = NavigationService();
+
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
@@ -32,6 +35,17 @@ class _HomeScreenState extends State<HomeScreen> {
     'Mes Tâches',
     'Profil'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Enregistrer le callback de navigation
+    _navigationService.navigateToTabFunction = (index) {
+      setState(() {
+        _currentIndex = index;
+      });
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
