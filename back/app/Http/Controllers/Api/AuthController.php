@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\AuthService;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * @OA\Post(
@@ -75,12 +76,12 @@ class AuthController extends Controller
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'in:admin,manager,user',
             'location' => 'nullable|string',
             'avatar' => 'nullable|string'
         ]);
 
-        $data = $request->only(['name', 'email', 'password', 'role', 'location', 'avatar']);
+        $data = $request->only(['name', 'email', 'password', 'location', 'avatar']);
+        $data['role'] = 'user';
         $response = $this->authService->register($data);
 
         return response()->json($response, 201);
