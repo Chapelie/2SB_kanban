@@ -1,0 +1,156 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "2SB_Kanban",
+        "description": "Documentation de l'API",
+        "contact": {
+            "email": "clemsobonding@gmail.com"
+        },
+        "license": {
+            "name": "ADE"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Connexion utilisateur",
+                "operationId": "f2a1e12b2f5fc17624bd407c8caa92a1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie"
+                    },
+                    "401": {
+                        "description": "Échec de l’authentification"
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Enregistrer un nouvel utilisateur",
+                "operationId": "8e4e3cb7b46126f4696379d3c7eeb4ad",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Jean Dupont"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "jean@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "user"
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "example": "Paris"
+                                    },
+                                    "avatar": {
+                                        "type": "string",
+                                        "example": "https://exemple.com/avatar.jpg"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Utilisateur enregistré"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Déconnexion de l'utilisateur",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Données de l'utilisateur connecté",
+                "operationId": "8367feff40ba10e43187792cad3132c1",
+                "responses": {
+                    "200": {
+                        "description": "Informations utilisateur"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Authentification",
+            "description": "Authentification"
+        }
+    ]
+}
