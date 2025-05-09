@@ -1,6 +1,4 @@
 import React from 'react';
-import { useTheme } from '../contexts/ThemeContext';
-
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -8,7 +6,6 @@ interface PaginationProps {
 }
 
 const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
-  const { theme } = useTheme();
   
   return (
     <div className="flex justify-center mt-6">

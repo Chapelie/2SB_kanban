@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import SecurityIllustration from '../../components/SecurityIllustration';
 import { useNavigate, Link } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
+import authService from '../../services/authService';
 
 interface LoginFormData {
     email: string;
@@ -14,27 +14,47 @@ interface LoginPageProps {
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
-    const { theme } = useTheme();
     const navigate = useNavigate();
     const [formData, setFormData] = useState<LoginFormData>({
         email: '',
         password: '',
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+        setError(null); // Réinitialiser l'erreur lorsque l'utilisateur modifie le formulaire
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle login logic here
-        console.log('Login submitted:', formData);
-        // Simuler une connexion réussie
-        onLoginSuccess();
-        // Rediriger vers le tableau de bord après la connexion
-        navigate('/dashboard/projects');
+        setIsLoading(true);
+        setError(null);
+        
+        try {
+            // Utilisation du service d'authentification pour la connexion
+            const response = await authService.login(formData);
+            console.log('Connexion réussie:', response);
+            
+            // Informer le composant parent de la connexion réussie
+            onLoginSuccess();
+            
+            // Rediriger vers le tableau de bord
+            navigate('/dashboard/projects');
+        } catch (error: any) {
+            console.error('Erreur de connexion:', error);
+            // Afficher un message d'erreur à l'utilisateur
+            if (error.response && error.response.data && error.response.data.message) {
+                setError(error.response.data.message);
+            } else {
+                setError('Erreur de connexion. Veuillez vérifier vos identifiants et réessayer.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const togglePasswordVisibility = () => {
@@ -79,6 +99,22 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Bienvenue</h2>
                             <p className="mt-2 text-xs sm:text-sm text-[var(--text-secondary)]">Veuillez entrer vos informations de connexion.</p>
                         </div>
+
+                        {/* Affichage des erreurs */}
+                        {error && (
+                            <div className="rounded-md bg-red-50 p-4">
+                                <div className="flex">
+                                    <div className="flex-shrink-0">
+                                        <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-medium text-red-800">{error}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <form className="mt-6 sm:mt-8 space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
                             <div className="space-y-3 sm:space-y-4">
@@ -144,9 +180,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                             <div>
                                 <button
                                     type="submit"
-                                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-color)]"
+                                    disabled={isLoading}
+                                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-color)] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Se connecter
+                                    {isLoading ? (
+                                        <>
+                                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Connexion...
+                                        </>
+                                    ) : (
+                                        'Se connecter'
+                                    )}
                                 </button>
                             </div>
                         </form>

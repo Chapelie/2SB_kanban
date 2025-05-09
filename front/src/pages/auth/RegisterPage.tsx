@@ -3,6 +3,7 @@ import { FiEye, FiEyeOff, FiUser, FiUpload } from 'react-icons/fi';
 import SecurityIllustration from '../../components/SecurityIllustration';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import authService from '../../services/authService';
 
 interface RegisterFormData {
   name: string;
@@ -34,6 +35,8 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterFormData, string>>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
@@ -48,6 +51,11 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
         ...prev,
         [name]: undefined
       }));
+    }
+    
+    // Effacer les erreurs API lorsque le formulaire est modifié
+    if (apiError) {
+      setApiError(null);
     }
   };
 
@@ -116,32 +124,61 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
       return;
     }
     
+    setIsLoading(true);
+    setApiError(null);
+    
     try {
-      // Dans une application réelle, vous enverriez les données à votre API ici
-      // y compris l'image qui devrait être envoyée en tant que FormData
-      console.log('Registration submitted:', formData);
+      // Préparation des données à envoyer à l'API
+      const registerData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        location: formData.location,
+        avatar: formData.avatar
+      };
       
-      // Créer un objet FormData pour envoyer les fichiers
-      const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('password', formData.password);
-      formDataToSend.append('location', formData.location);
-      if (formData.avatar) {
-        formDataToSend.append('avatar', formData.avatar);
-      }
-      
-      // Simuler une requête API
-      // Dans une application réelle : await api.post('/register', formDataToSend);
+      // Utilisation du service d'authentification pour l'inscription
+      const response = await authService.register(registerData);
+      console.log('Inscription réussie:', response);
       
       // Si l'inscription est réussie, appeler onRegisterSuccess
       onRegisterSuccess();
       
       // Rediriger vers le tableau de bord après la connexion
       navigate('/dashboard/projects');
-    } catch (error) {
-      console.error('Registration failed:', error);
-      // Gérer les erreurs d'inscription ici
+    } catch (error: any) {
+      console.error('Erreur d\'inscription:', error);
+      
+      // Amélioration du traitement des erreurs
+      if (error.response?.data?.errors && typeof error.response.data.errors === 'object') {
+        // Si le serveur renvoie des erreurs spécifiques aux champs
+        const serverErrors = error.response.data.errors;
+        const fieldErrors: Partial<Record<keyof RegisterFormData, string>> = {};
+        
+        // Convertir les erreurs du serveur en format compatible avec notre état d'erreurs
+        Object.entries(serverErrors).forEach(([key, value]) => {
+          if (key in formData) {
+            fieldErrors[key as keyof RegisterFormData] = Array.isArray(value) 
+              ? value[0] 
+              : String(value);
+          }
+        });
+        
+        if (Object.keys(fieldErrors).length > 0) {
+          setErrors(prev => ({ ...prev, ...fieldErrors }));
+        } else {
+          // Si pas d'erreurs spécifiques aux champs, utiliser le message général
+          setApiError(error.response?.data?.message || 'Une erreur est survenue lors de l\'inscription.');
+        }
+      } else if (error.response?.data?.message) {
+        setApiError(error.response.data.message);
+      } else if (error.message) {
+        setApiError(error.message);
+      } else {
+        setApiError('Une erreur est survenue lors de l\'inscription. Veuillez réessayer.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -187,6 +224,22 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
               <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">Créer un compte</h2>
               <p className="mt-2 text-xs sm:text-sm text-[var(--text-secondary)]">Rejoignez notre communauté en créant votre compte.</p>
             </div>
+
+            {/* Affichage des erreurs API */}
+            {apiError && (
+              <div className="rounded-md bg-red-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">{apiError}</h3>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <form className="mt-6 sm:mt-8 space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
               {/* Photo de profil */}
@@ -337,9 +390,20 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess }) => {
               <div>
                 <button
                   type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-color)]"
+                  disabled={isLoading}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--accent-color)] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  S'inscrire
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Inscription...
+                    </>
+                  ) : (
+                    'S\'inscrire'
+                  )}
                 </button>
               </div>
             </form>

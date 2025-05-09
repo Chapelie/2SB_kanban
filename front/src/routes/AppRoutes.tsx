@@ -14,7 +14,6 @@ import SettingsPage from '../pages/SettingsPage';
 import AdminPage from '../pages/AdminPage';
 import NotificationsPage from '../pages/NotificationsPage';
 import MessagesPage from '../pages/MessagesPage';
-
 import { User } from '../types';
 
 // Composant pour les routes protégées qui nécessitent une authentification
@@ -24,6 +23,7 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ isAuthenticated, children }) => {
+  // Ne vérifiez que l'état isAuthenticated fourni par les props et pas le localStorage
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
@@ -36,13 +36,14 @@ interface AppRoutesProps {
   currentUser: User;
   handleLoginSuccess: () => void;
   handleRegisterSuccess: () => void;
+  handleLogout: () => void;
 }
 
 const AppRoutes: React.FC<AppRoutesProps> = ({
   isAuthenticated,
-  currentUser,
   handleLoginSuccess,
-  handleRegisterSuccess
+  handleRegisterSuccess,
+
 }) => {
   return (
     <Routes>
@@ -84,7 +85,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
       {/* Routes protégées de l'application */}
       <Route path="/dashboard" element={
         <ProtectedRoute isAuthenticated={isAuthenticated}>
-          <Dashboard user={currentUser} />
+          <Dashboard/>
         </ProtectedRoute>
       }>
         <Route path="projects" element={<ProjectsPage />} />

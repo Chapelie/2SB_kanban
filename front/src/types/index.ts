@@ -20,9 +20,12 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  role: 'admin' | 'user' | 'guest';
   location: string;
   avatar: string;
   initials?: string;
+  createdAt?: string;
+  lastLogin?: string;
 }
 
 export interface SubTask {

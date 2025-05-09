@@ -8,7 +8,6 @@ import Pagination from '../components/Pagination';
 import ProjectSelector from '../components/ProjectSelector';
 import { FaFileAlt, FaClipboardList, FaSearch, FaPlusCircle, FaTable, FaListUl } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext';
 
 // Utilisateur connecté (simulé)
 const currentUser: User = {
@@ -104,9 +103,9 @@ const getMockProjects = (): Project[] => {
       status: 'OnTrack',
       issuesCount: 8,
       teamMembers: [
-        { id: '1', name: 'Rafik SAWADOGO', avatar: '/api/placeholder/28/28' },
-        { id: '2', name: 'Marie Dupont', avatar: '/api/placeholder/28/28' },
-        { id: '3', name: 'Alex Martin', avatar: '/api/placeholder/28/28' },
+        { id: '1', name: 'Rafik SAWADOGO', avatar: '/api/placeholder/28/28', location: 'Bobo, Burkina Faso' },
+        { id: '2', name: 'Marie Dupont', avatar: '/api/placeholder/28/28', location: 'Paris, France' },
+        { id: '3', name: 'Alex Martin', avatar: '/api/placeholder/28/28', location: 'Lyon, France' },
       ]
     },
     {
@@ -117,9 +116,9 @@ const getMockProjects = (): Project[] => {
       status: 'OnTrack',
       issuesCount: 12,
       teamMembers: [
-        { id: '1', name: 'Rafik SAWADOGO', avatar: '/api/placeholder/28/28' },
-        { id: '4', name: 'Pierre Moreau', avatar: '/api/placeholder/28/28' },
-        { id: '5', name: 'Emma Laurent', avatar: '/api/placeholder/28/28' },
+        { id: '1', name: 'Rafik SAWADOGO', avatar: '/api/placeholder/28/28', location: 'Bobo, Burkina Faso' },
+        { id: '4', name: 'Pierre Moreau', avatar: '/api/placeholder/28/28', location: 'Marseille, France' },
+        { id: '5', name: 'Emma Laurent', avatar: '/api/placeholder/28/28', location: 'Bordeaux, France' },
       ]
     },
     {
@@ -130,9 +129,9 @@ const getMockProjects = (): Project[] => {
       status: 'Offtrack',
       issuesCount: 6,
       teamMembers: [
-        { id: '1', name: 'Rafik SAWADOGO', avatar: '/api/placeholder/28/28' },
-        { id: '3', name: 'Alex Martin', avatar: '/api/placeholder/28/28' },
-        { id: '6', name: 'Lucas Bernard', avatar: '/api/placeholder/28/28' },
+        { id: '1', name: 'Rafik SAWADOGO', avatar: '/api/placeholder/28/28', location: 'Bobo, Burkina Faso' },
+        { id: '3', name: 'Alex Martin', avatar: '/api/placeholder/28/28', location: 'Lyon, France' },
+        { id: '6', name: 'Lucas Bernard', avatar: '/api/placeholder/28/28', location: 'Lille, France' },
       ]
     }
   ];
@@ -172,7 +171,6 @@ const KanbanView: React.FC<{
   onTaskClick: (taskId: string) => void,
   onTaskMove: (taskId: string, newStatus: Task['status']) => void
 }> = ({ tasks, onTaskClick, onTaskMove }) => {
-  const { theme } = useTheme();
   
   // Grouper les tâches par statut
   const todoTasks = tasks.filter(task => task.status === 'Open');
@@ -405,7 +403,6 @@ const Notification: React.FC<{
 };
 
 const TasksPage: React.FC = () => {
-  const { theme } = useTheme();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<string>('all');
