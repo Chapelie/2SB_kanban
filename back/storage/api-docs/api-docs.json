@@ -307,9 +307,521 @@
                     }
                 }
             }
+        },
+        "/api/subtasks": {
+            "get": {
+                "tags": [
+                    "SubTasks"
+                ],
+                "summary": "Lister toutes les sous-tâches avec filtres",
+                "operationId": "61fa9200c37aeb7628a117531763048e",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "priority",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "assigned_to",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "parent_task_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des sous-tâches"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "SubTasks"
+                ],
+                "summary": "Créer une sous-tâche",
+                "operationId": "73f84ab45ad18bb9f12c490d6ef739f6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "parent_task_id"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "priority": {
+                                        "type": "string"
+                                    },
+                                    "assigned_to": {
+                                        "type": "integer"
+                                    },
+                                    "parent_task_id": {
+                                        "type": "integer"
+                                    },
+                                    "due_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Sous-tâche créée"
+                    }
+                }
+            }
+        },
+        "/api/subtasks/{id}": {
+            "get": {
+                "tags": [
+                    "SubTasks"
+                ],
+                "summary": "Afficher une sous-tâche",
+                "operationId": "0b04b57d2c71c8f0b9990f5ead40132a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sous-tâche trouvée"
+                    },
+                    "404": {
+                        "description": "Non trouvée"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "SubTasks"
+                ],
+                "summary": "Mettre à jour une sous-tâche",
+                "operationId": "ad4863a1816812b2cbd0aa774d29e615",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "priority": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string"
+                                    },
+                                    "assigned_to": {
+                                        "type": "integer"
+                                    },
+                                    "due_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sous-tâche mise à jour"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "SubTasks"
+                ],
+                "summary": "Supprimer une sous-tâche",
+                "operationId": "5b0d8a11f91c6d5439f05dc97ded8ce7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Supprimée avec succès"
+                    }
+                }
+            }
+        },
+        "/api/subtasks/{id}/status": {
+            "put": {
+                "tags": [
+                    "SubTasks"
+                ],
+                "summary": "Changer le statut d'une sous-tâche",
+                "operationId": "007ee3cc112aeefa549a826921089bf9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Statut mis à jour"
+                    }
+                }
+            }
+        },
+        "/api/tasks": {
+            "get": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Lister les tâches (avec filtres)",
+                "operationId": "be68905d866e856db6c738172b8d929a",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "priority",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "assigned_to",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "project_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des tâches"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Créer une tâche",
+                "operationId": "ebbaabc58e3db61374a57c53544959b2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "project_id"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "priority": {
+                                        "type": "string"
+                                    },
+                                    "assigned_to": {
+                                        "type": "integer"
+                                    },
+                                    "project_id": {
+                                        "type": "integer"
+                                    },
+                                    "kanban_status": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tâche créée"
+                    }
+                }
+            }
+        },
+        "/api/tasks/{id}": {
+            "get": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Afficher une tâche",
+                "operationId": "32c40e2d1129b80c1dcabd538df63a33",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tâche affichée"
+                    },
+                    "404": {
+                        "description": "Tâche non trouvée"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Mettre à jour une tâche",
+                "operationId": "c36c959b634c99e1e02ad2f3f2c36a2c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "priority": {
+                                        "type": "string"
+                                    },
+                                    "assigned_to": {
+                                        "type": "integer"
+                                    },
+                                    "status": {
+                                        "type": "string"
+                                    },
+                                    "kanban_status": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tâche mise à jour"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Supprimer une tâche",
+                "operationId": "d81cc7975ea62176b4ef8f74ed95168d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Tâche supprimée"
+                    }
+                }
+            }
+        },
+        "/api/tasks/{id}/status": {
+            "put": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Changer le statut d'une tâche",
+                "operationId": "c391b34afd81e06fd572a55697806196",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Statut modifié"
+                    }
+                }
+            }
+        },
+        "/api/tasks/{id}/kanban": {
+            "put": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Déplacer une tâche dans le tableau Kanban",
+                "operationId": "cd8460854249968dbd68d5c0f6e66afe",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kanban_status"
+                                ],
+                                "properties": {
+                                    "kanban_status": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Colonne mise à jour"
+                    }
+                }
+            }
+        },
+        "/api/projects/{projectId}/kanban": {
+            "get": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Afficher le tableau Kanban d'un projet",
+                "operationId": "a369d848e7e86653ea6d25a756bdfa14",
+                "parameters": [
+                    {
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Colonnes Kanban du projet"
+                    }
+                }
+            }
         }
     },
     "tags": [
+        {
+            "name": "SubTasks",
+            "description": "Gestion des sous-tâches"
+        },
+        {
+            "name": "Tasks",
+            "description": "API de gestion des tâches"
+        },
         {
             "name": "Authentification",
             "description": "Authentification"
