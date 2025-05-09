@@ -12,6 +12,156 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/attachments/upload": {
+            "post": {
+                "tags": [
+                    "Attachments"
+                ],
+                "summary": "Téléverser un fichier encodé en base64",
+                "operationId": "a73aae8f54b9579e65b8cfc320667611",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "fichier_test.png"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "image/png"
+                                    },
+                                    "task_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "sub_task_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Fichier téléversé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Fichier téléversé avec succès"
+                                        },
+                                        "attachment": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/attachments/task/{taskId}": {
+            "get": {
+                "tags": [
+                    "Attachments"
+                ],
+                "summary": "Lister les fichiers d'une tâche",
+                "operationId": "b333240ee0a3cfc48783e99a19446f92",
+                "parameters": [
+                    {
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des pièces jointes"
+                    }
+                }
+            }
+        },
+        "/api/attachments/sub-task/{subTaskId}": {
+            "get": {
+                "tags": [
+                    "Attachments"
+                ],
+                "summary": "Lister les fichiers d'une sous-tâche",
+                "operationId": "8ded6a16a1594335e3d2a1455ecadd4c",
+                "parameters": [
+                    {
+                        "name": "subTaskId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des pièces jointes"
+                    }
+                }
+            }
+        },
+        "/api/attachments/{id}": {
+            "delete": {
+                "tags": [
+                    "Attachments"
+                ],
+                "summary": "Supprimer une pièce jointe",
+                "operationId": "66e2f863588e3bac0aca3972e89726b3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Fichier supprimé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Fichier supprimé avec succès"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/login": {
             "post": {
                 "tags": [
@@ -814,6 +964,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Attachments",
+            "description": "Gestion des pièces jointes"
+        },
         {
             "name": "SubTasks",
             "description": "Gestion des sous-tâches"
