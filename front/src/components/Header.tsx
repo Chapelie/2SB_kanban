@@ -2,16 +2,28 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaBell, FaEnvelope, FaRegQuestionCircle, FaChevronDown, FaUser, FaCog, FaSignOutAlt, FaShieldAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
+import authService from '../services/authService';
 
 interface HeaderProps {
-  user: User;
   activePage: string;
+  onLogout?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
+const Header: React.FC<HeaderProps> = ({ activePage, onLogout }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  // Récupérer l'utilisateur connecté
+  useEffect(() => {
+    const currentUser = authService.getCurrentUser();
+    if (currentUser) {
+      setUser(currentUser);
+    }
+  
+  }, []);
 
   // Gérer la fermeture du menu au clic en dehors
   useEffect(() => {
@@ -87,17 +99,45 @@ const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
     navigate('/dashboard/messages');
   };
 
-  const handleLogout = () => {
-    // Simuler une déconnexion
-    alert('Déconnexion simulée');
-    setShowUserMenu(false);
-    // Dans une vraie application, vous implémenteriez un processus de déconnexion complet
-    // navigate('/login');
+  const handleLogout = async () => {
+      // Utiliser un seul setIsLoggingOut
+      setIsLoggingOut(true);
+
+      if(onLogout) {
+        onLogout();
+        return;
+      }
+      
+      // Nettoyer l'état local immédiatement
+      setUser(null);
+      setShowUserMenu(false);
+      
+    // Puis nettoyer localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('theme');
+    localStorage.removeItem('fontSize');
+    localStorage.removeItem('tutorialCompleted');
+    localStorage.removeItem('animations');
+      
+      window.location.href = '/login';
+      
+      
+  
   };
 
   const toggleUserMenu = () => {
     setShowUserMenu(prev => !prev);
   };
+
+  // Si l'utilisateur n'est pas chargé, afficher un spinner
+  if (!user) {
+    return (
+      <div className="h-16 bg-[var(--bg-primary)] border-b border-[var(--border-color)] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-[var(--accent-color)]"></div>
+      </div>
+    );
+  }
   
   return (
     <div className="h-16 bg-[var(--bg-primary)] border-b border-[var(--border-color)] flex items-center justify-between px-4 sm:px-6 lg:px-8 shadow-sm">
@@ -158,7 +198,6 @@ const Header: React.FC<HeaderProps> = ({ user, activePage }) => {
           >
             <div className="mr-2 text-right hidden sm:block">
               <div className="font-medium text-[var(--text-primary)] hover:text-[var(--accent-color)] transition-colors duration-200">{user.name}</div>
-              {/* Location a été supprimé ici */}
             </div>
             <div className="flex items-center space-x-1">
               <img

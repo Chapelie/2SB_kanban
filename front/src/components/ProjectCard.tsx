@@ -1,17 +1,15 @@
-import React from 'react';
+import React, { useMemo, memo } from 'react';
 import { FaCalendarAlt, FaExternalLinkAlt, FaUsers, FaExclamationCircle, FaArrowRight } from 'react-icons/fa';
 import { Project } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface ProjectCardProps {
   project: Project;
   onClick?: () => void;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
+const ProjectCard: React.FC<ProjectCardProps> = memo(({ project, onClick }) => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
 
   const handleCardClick = () => {
     if (onClick) {
@@ -26,23 +24,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
     window.open(`/dashboard/projects/${project.id}`, '_blank');
   };
 
-  // Calcul de la progression estimée basée sur le statut (simulé)
-  const getProgressPercentage = () => {
+  // Calcul de la progression estimée basée sur le statut
+  const progress = useMemo(() => {
     const now = new Date();
     const dueDate = new Date(project.dueDate.split(' ').slice(1).join(' '));
     const creationDate = new Date(now);
-    creationDate.setDate(now.getDate() - 30); // Supposons que le projet a commencé il y a 30 jours
+    creationDate.setDate(now.getDate() - 30);
     
     const totalDuration = dueDate.getTime() - creationDate.getTime();
     const elapsed = now.getTime() - creationDate.getTime();
     
-    const progress = Math.min(Math.floor((elapsed / totalDuration) * 100), 100);
-    return project.status === 'Offtrack' ? progress - 15 : progress;
-  };
-
+    const progressValue = Math.min(Math.floor((elapsed / totalDuration) * 100), 100);
+    return project.status === 'Offtrack' ? progressValue - 15 : progressValue;
+  }, [project.dueDate, project.status]);
 
   // Déterminer la couleur du badge de statut
-  const getStatusColor = () => {
+  const statusColor = useMemo(() => {
     switch (project.status) {
       case 'Offtrack':
         return 'bg-red-100 text-red-600 border border-red-200';
@@ -51,24 +48,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
       default:
         return 'bg-blue-100 text-blue-600 border border-blue-200';
     }
-  };
+  }, [project.status]);
 
   // Calculer jours restants
-  const getDaysRemaining = () => {
+  const daysRemaining = useMemo(() => {
     const now = new Date();
     const dueDate = new Date(project.dueDate.split(' ').slice(1).join(' '));
     const diffTime = dueDate.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    return diffDays;
-  };
-
-  const progress = getProgressPercentage();
-  const daysRemaining = getDaysRemaining();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }, [project.dueDate]);
 
   return (
     <div 
-      className="bg-[var(--card-bg)] rounded-lg overflow-hidden shadow-sm border border-[var(--border-color)] mb-4 group hover:shadow-lg transition-all duration-300 transform hover:translate-y-[-3px] cursor-pointer"
+      className="bg-[var(--card-bg)] rounded-lg overflow-hidden shadow-sm border border-[var(--border-color)] mb-4 group hover:shadow-lg transition-all duration-300 transform hover:translate-y-[-3px)] cursor-pointer"
       onClick={handleCardClick}
     >
       {/* Barre de progression en haut */}
@@ -97,7 +89,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
                 <FaExternalLinkAlt size={14} />
               </button>
             </div>
-            <div className={`mt-1.5 px-3 py-1 rounded-full text-xs font-medium inline-flex items-center ${getStatusColor()}`}>
+            <div className={`mt-1.5 px-3 py-1 rounded-full text-xs font-medium inline-flex items-center ${statusColor}`}>
               <span className={`w-2 h-2 rounded-full mr-1.5 ${
                 project.status === 'Offtrack' ? 'bg-red-500' : 
                 project.status === 'OnTrack' ? 'bg-green-500' : 'bg-blue-500'
@@ -134,6 +126,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
                     src={member.avatar || '/api/placeholder/32/32'} 
                     alt={member.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/api/placeholder/32/32';
+                    }}
                   />
                 </div>
               ))}
@@ -172,6 +167,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
       </div>
     </div>
   );
-};
+});
+
+ProjectCard.displayName = 'ProjectCard';
 
 export default ProjectCard;

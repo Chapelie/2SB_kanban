@@ -80,7 +80,7 @@ const TutorialStep: React.FC<TutorialStepProps> = ({
           style = {
             position: 'fixed',
             top: rect.bottom + 15,
-            left: rect.right - popupWidth, // Aligné avec le bord droit du menu utilisateur
+            left: rect.right - popupWidth, 
             zIndex: 1100
           };
         } else {
