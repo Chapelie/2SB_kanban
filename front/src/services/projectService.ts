@@ -13,7 +13,7 @@ class ProjectService {
   // Récupérer tous les projets
   async getProjects(): Promise<Project[]> {
     try {
-      const response = await api.get<Project[]>('/projects');
+      const response = await api.get<Project[]>('/projects/');
       return response.data;
     } catch (error) {
       console.error('Erreur lors de la récupération des projets:', error);

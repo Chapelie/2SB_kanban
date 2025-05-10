@@ -188,7 +188,7 @@ class AuthService {
     // Méthode pour mettre à jour le profil utilisateur
   async updateProfile(userData: ProfileUpdateData): Promise<any> {
     try {
-      let requestData: any = { ...userData };
+      const requestData: any = { ...userData };
       
       // Si un nouvel avatar est fourni sous forme de fichier, le convertir en base64
       if (userData.avatar instanceof File) {
